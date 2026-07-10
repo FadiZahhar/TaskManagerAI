@@ -1,0 +1,333 @@
+{
+  "info": {
+    "name": "Task Tracker API - Module 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "task_id", "value": "" },
+    { "key": "task_id_2", "value": "" },
+    { "key": "task_id_matrix", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health returns 200",
+          "request": { "method": "GET", "url": "{{base_url}}/health" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "pm.test('body has status ok', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "Happy Path CRUD",
+      "item": [
+        {
+          "name": "POST /tasks creates task (201)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/tasks",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"Write report\",\"description\":\"Quarterly report\",\"priority\":\"High\",\"assignee\":\"Alex\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 201', () => pm.response.to.have.status(201));",
+            "const body = pm.response.json();",
+            "pm.test('has generated id', () => pm.expect(body.id).to.be.a('string'));",
+            "pm.test('defaults status to ToDo', () => pm.expect(body.status).to.eql('ToDo'));",
+            "pm.test('echoes priority', () => pm.expect(body.priority).to.eql('High'));",
+            "pm.collectionVariables.set('task_id', body.id);"
+          ]}}]
+        },
+        {
+          "name": "GET /tasks includes created task (200)",
+          "request": { "method": "GET", "url": "{{base_url}}/tasks" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "const body = pm.response.json();",
+            "pm.test('body is array', () => pm.expect(body).to.be.an('array'));",
+            "const id = pm.collectionVariables.get('task_id');",
+            "pm.test('contains created task', () => pm.expect(body.some(t => t.id === id)).to.be.true);"
+          ]}}]
+        },
+        {
+          "name": "GET /tasks/{id} returns task (200)",
+          "request": { "method": "GET", "url": "{{base_url}}/tasks/{{task_id}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "pm.test('id matches', () => pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('task_id')));"
+          ]}}]
+        },
+        {
+          "name": "PATCH /tasks/{id} title-only update (200)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/tasks/{{task_id}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"Write report v2\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "const body = pm.response.json();",
+            "pm.test('title updated', () => pm.expect(body.title).to.eql('Write report v2'));",
+            "pm.test('priority unchanged', () => pm.expect(body.priority).to.eql('High'));"
+          ]}}]
+        },
+        {
+          "name": "PATCH /tasks/{id} ToDo->InProgress (200)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/tasks/{{task_id}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"status\":\"InProgress\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "pm.test('status is InProgress', () => pm.expect(pm.response.json().status).to.eql('InProgress'));"
+          ]}}]
+        },
+        {
+          "name": "DELETE /tasks/{id} (204, empty body)",
+          "request": { "method": "DELETE", "url": "{{base_url}}/tasks/{{task_id}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 204', () => pm.response.to.have.status(204));",
+            "pm.test('body is empty', () => pm.expect(pm.response.text()).to.eql(''));"
+          ]}}]
+        },
+        {
+          "name": "GET /tasks/{id} after delete (404)",
+          "request": { "method": "GET", "url": "{{base_url}}/tasks/{{task_id}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 404', () => pm.response.to.have.status(404));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "Validation Errors (POST /tasks)",
+      "item": [
+        {
+          "name": "POST missing title (422)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/tasks",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        },
+        {
+          "name": "POST blank title (422)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/tasks",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"   \"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        },
+        {
+          "name": "POST invalid priority (422)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/tasks",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"Task\",\"priority\":\"Urgent\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        },
+        {
+          "name": "POST unknown field (422)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/tasks",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"Task\",\"bogus\":\"x\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "Filtering (GET /tasks)",
+      "item": [
+        {
+          "name": "POST task with priority High (setup)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/tasks",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"High priority task\",\"priority\":\"High\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('task_id_2', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "GET /tasks?priority=High returns only matches (200)",
+          "request": { "method": "GET", "url": "{{base_url}}/tasks?priority=High" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "const body = pm.response.json();",
+            "pm.test('all results are High priority', () => pm.expect(body.every(t => t.priority === 'High')).to.be.true);",
+            "const id = pm.collectionVariables.get('task_id_2');",
+            "pm.test('contains setup task', () => pm.expect(body.some(t => t.id === id)).to.be.true);"
+          ]}}]
+        },
+        {
+          "name": "GET /tasks?status=Bogus (422)",
+          "request": { "method": "GET", "url": "{{base_url}}/tasks?status=Bogus" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        },
+        {
+          "name": "DELETE setup task (cleanup)",
+          "request": { "method": "DELETE", "url": "{{base_url}}/tasks/{{task_id_2}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 204', () => pm.response.to.have.status(204));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "Not Found (unknown id)",
+      "item": [
+        {
+          "name": "GET /tasks/not-real-id (404)",
+          "request": { "method": "GET", "url": "{{base_url}}/tasks/not-real-id" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 404', () => pm.response.to.have.status(404));"
+          ]}}]
+        },
+        {
+          "name": "PATCH /tasks/not-real-id (404)",
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/tasks/not-real-id",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"x\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 404', () => pm.response.to.have.status(404));"
+          ]}}]
+        },
+        {
+          "name": "DELETE /tasks/not-real-id (404)",
+          "request": { "method": "DELETE", "url": "{{base_url}}/tasks/not-real-id" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 404', () => pm.response.to.have.status(404));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "Status Transition Matrix",
+      "item": [
+        {
+          "name": "POST fresh task for matrix (setup)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/tasks",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"Transition matrix task\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('task_id_matrix', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "ToDo -> Done (422, not allowed)",
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/tasks/{{task_id_matrix}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"status\":\"Done\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        },
+        {
+          "name": "ToDo -> ToDo same-status (422)",
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/tasks/{{task_id_matrix}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"status\":\"ToDo\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        },
+        {
+          "name": "ToDo -> InProgress (200, allowed)",
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/tasks/{{task_id_matrix}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"status\":\"InProgress\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));"
+          ]}}]
+        },
+        {
+          "name": "InProgress -> ToDo reverse (422, not allowed)",
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/tasks/{{task_id_matrix}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"status\":\"ToDo\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        },
+        {
+          "name": "InProgress -> Done (200, allowed)",
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/tasks/{{task_id_matrix}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"status\":\"Done\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));"
+          ]}}]
+        },
+        {
+          "name": "Done -> ToDo (422, not allowed)",
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/tasks/{{task_id_matrix}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"status\":\"ToDo\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 422', () => pm.response.to.have.status(422));"
+          ]}}]
+        },
+        {
+          "name": "Done -> InProgress (200, allowed)",
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/tasks/{{task_id_matrix}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"status\":\"InProgress\"}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));"
+          ]}}]
+        },
+        {
+          "name": "DELETE matrix task (cleanup)",
+          "request": { "method": "DELETE", "url": "{{base_url}}/tasks/{{task_id_matrix}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('status is 204', () => pm.response.to.have.status(204));"
+          ]}}]
+        }
+      ]
+    }
+  ]
+}
