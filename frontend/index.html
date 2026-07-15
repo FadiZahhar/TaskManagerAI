@@ -7,15 +7,77 @@
   <style>
     :root {
       color-scheme: light dark;
-      --gap: 1rem;
-      --column-bg: #f4f5f7;
-      --card-bg: #ffffff;
-      --border: #d9dce1;
-      --text: #1f2328;
-      --muted: #6b7280;
-      --high: #c0392b;
-      --medium: #b7791f;
-      --low: #2f855a;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --surface-alt: #f1f2f5;
+      --border: #e2e4e9;
+      --text: #1a1d23;
+      --text-muted: #6b7280;
+
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-ring: rgba(79, 70, 229, 0.15);
+
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+
+      --priority-high: #b91c1c;
+      --priority-high-bg: #fee2e2;
+      --priority-medium: #b45309;
+      --priority-medium-bg: #fef3c7;
+      --priority-low: #15803d;
+      --priority-low-bg: #dcfce7;
+
+      --status-todo: #6b7280;
+      --status-inprogress: #2563eb;
+      --status-done: #16a34a;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+
+      --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+      --shadow-md: 0 6px 16px rgba(16, 24, 40, 0.10);
+      --shadow-lg: 0 16px 40px rgba(16, 24, 40, 0.20);
+
+      --drag-over-bg: rgba(79, 70, 229, 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14161a;
+        --surface: #1c1f26;
+        --surface-alt: #20232b;
+        --border: #2c2f38;
+        --text: #e6e8eb;
+        --text-muted: #9aa1ac;
+
+        --accent: #818cf8;
+        --accent-hover: #a5b4fc;
+        --accent-ring: rgba(129, 140, 248, 0.25);
+
+        --danger: #f87171;
+        --danger-bg: rgba(248, 113, 113, 0.15);
+
+        --priority-high: #fca5a5;
+        --priority-high-bg: rgba(248, 113, 113, 0.15);
+        --priority-medium: #fcd34d;
+        --priority-medium-bg: rgba(251, 191, 36, 0.15);
+        --priority-low: #86efac;
+        --priority-low-bg: rgba(74, 222, 128, 0.15);
+
+        --status-todo: #9aa1ac;
+        --status-inprogress: #60a5fa;
+        --status-done: #4ade80;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+        --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+        --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
+
+        --drag-over-bg: rgba(129, 140, 248, 0.12);
+      }
     }
 
     * {
@@ -24,29 +86,9 @@
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: var(--font);
+      background: var(--bg);
       color: var(--text);
-      background: #ffffff;
-    }
-
-    header.app-header {
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    header.app-header h1 {
-      margin: 0;
-      font-size: 1.375rem;
-    }
-
-    header.app-header p {
-      margin: 0.25rem 0 0;
-      color: var(--muted);
-      font-size: 0.9rem;
     }
 
     button {
@@ -54,37 +96,167 @@
       cursor: pointer;
     }
 
-    #new-task-btn {
-      background: var(--text);
+    /* Header */
+
+    header.app-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.25rem 1.75rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    header.app-header h1 {
+      margin: 0;
+      font-size: 1.375rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    header.app-header p {
+      margin: 0.25rem 0 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent);
       color: #fff;
       border: none;
-      border-radius: 6px;
-      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 1rem;
       font-weight: 600;
+      font-size: 0.9rem;
       white-space: nowrap;
+      box-shadow: var(--shadow-sm);
+      transition: background-color 0.15s ease, transform 0.1s ease;
     }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background: var(--surface-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    /* Status banner */
+
+    #board-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+      padding: 0.65rem 1.75rem;
+      font-size: 0.875rem;
+    }
+
+    #board-banner:empty {
+      display: none;
+      padding: 0;
+    }
+
+    #board-banner[data-state="loading"] {
+      color: var(--text-muted);
+    }
+
+    #board-banner[data-state="error"] {
+      color: var(--danger);
+      font-weight: 600;
+      background: var(--danger-bg);
+    }
+
+    .spinner {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Board + columns */
 
     main.board {
       display: flex;
-      gap: var(--gap);
-      padding: 1.5rem;
+      gap: 1.25rem;
+      padding: 1.5rem 1.75rem;
       align-items: flex-start;
     }
 
     section.column {
       flex: 1 1 0;
       min-width: 0;
-      background: var(--column-bg);
-      border-radius: 8px;
-      padding: 0.75rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
     }
 
     section.column h2 {
-      margin: 0 0 0.75rem;
-      font-size: 1rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 0.5rem;
+      margin: 0 0 0.9rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    section.column[data-status="ToDo"] .status-dot {
+      background: var(--status-todo);
+    }
+
+    section.column[data-status="InProgress"] .status-dot {
+      background: var(--status-inprogress);
+    }
+
+    section.column[data-status="Done"] .status-dot {
+      background: var(--status-done);
+    }
+
+    .column-count {
+      margin-left: auto;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.05rem 0.5rem;
     }
 
     ul.card-list {
@@ -93,99 +265,162 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.6rem;
       min-height: 3rem;
+      border-radius: var(--radius-md);
+      transition: background-color 0.15s ease;
     }
 
+    ul.card-list.drag-over {
+      background: var(--drag-over-bg);
+      outline: 2px dashed var(--accent);
+      outline-offset: 3px;
+    }
+
+    /* Cards */
+
     li.card {
-      background: var(--card-bg);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.65rem 0.75rem;
+      border-radius: var(--radius-md);
+      padding: 0.8rem 0.9rem;
+      box-shadow: var(--shadow-sm);
       cursor: grab;
+      transition: box-shadow 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    li.card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    li.card:active {
+      cursor: grabbing;
     }
 
     li.card.dragging {
       opacity: 0.5;
-    }
-
-    ul.card-list.drag-over {
-      outline: 2px dashed var(--muted);
-      outline-offset: 2px;
+      transform: scale(0.98);
     }
 
     li.card .card-title {
       font-weight: 600;
-      margin: 0 0 0.25rem;
+      font-size: 0.95rem;
+      line-height: 1.3;
+      margin: 0 0 0.5rem;
     }
 
-    li.card .card-meta {
-      font-size: 0.8rem;
-      color: var(--muted);
+    li.card .card-footer {
       display: flex;
+      align-items: center;
       gap: 0.5rem;
       flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .card-edit-btn {
-      margin-left: auto;
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 0.1rem 0.5rem;
-      font-size: 0.75rem;
-      color: var(--text);
     }
 
     .priority-badge {
-      font-weight: 600;
-      text-transform: uppercase;
       font-size: 0.7rem;
-      letter-spacing: 0.03em;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
     }
 
     .priority-High {
-      color: var(--high);
+      color: var(--priority-high);
+      background: var(--priority-high-bg);
     }
 
     .priority-Medium {
-      color: var(--medium);
+      color: var(--priority-medium);
+      background: var(--priority-medium-bg);
     }
 
     .priority-Low {
-      color: var(--low);
+      color: var(--priority-low);
+      background: var(--priority-low-bg);
     }
 
-    .column-count {
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--muted);
+    .assignee {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .avatar.unassigned {
+      background: transparent;
+      border: 1px dashed var(--border);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.1rem;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      border-radius: 6px;
+      padding: 0.3rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .icon-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .icon-btn:hover {
+      background: var(--surface-alt);
+    }
+
+    .icon-btn.edit:hover {
+      color: var(--accent);
+    }
+
+    .icon-btn.delete:hover {
+      color: var(--danger);
+      background: var(--danger-bg);
     }
 
     .empty-placeholder {
-      color: var(--muted);
-      font-size: 0.85rem;
-      font-style: italic;
-      padding: 0.5rem 0.1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 1.5rem 0.5rem;
     }
 
-    #board-banner {
-      margin: 0 1.5rem;
-      font-size: 0.9rem;
-    }
-
-    #board-banner[data-state="loading"] {
-      color: var(--muted);
-    }
-
-    #board-banner[data-state="error"] {
-      color: var(--high);
-      font-weight: 600;
-    }
-
-    #board-banner:empty {
-      display: none;
+    .empty-placeholder svg {
+      width: 26px;
+      height: 26px;
+      opacity: 0.5;
     }
 
     @media (max-width: 720px) {
@@ -198,66 +433,85 @@
       }
     }
 
+    /* Modal */
+
     dialog#task-modal {
       border: none;
-      border-radius: 10px;
-      padding: 1.25rem 1.5rem 1.5rem;
-      width: min(420px, 90vw);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 0;
+      width: min(440px, 92vw);
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-lg);
     }
 
     dialog#task-modal::backdrop {
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(10, 12, 15, 0.5);
+    }
+
+    #task-form {
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1.5rem 1.25rem;
     }
 
     .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
 
     .modal-header h2 {
       margin: 0;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
+      font-weight: 700;
     }
 
     #modal-close-btn {
-      background: none;
-      border: none;
-      font-size: 1.25rem;
-      line-height: 1;
-      color: var(--muted);
-      padding: 0.1rem 0.4rem;
+      color: var(--text-muted);
     }
 
     .modal-error {
-      color: var(--high);
-      font-size: 0.85rem;
+      color: var(--danger);
+      font-size: 0.82rem;
       min-height: 1.1em;
-      margin: 0 0 0.5rem;
+      margin: 0.25rem 0 0.5rem;
     }
 
     .field {
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.85rem;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.3rem;
     }
 
     .field label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
     }
 
     .field input,
     .field textarea,
     .field select {
       font: inherit;
-      padding: 0.4rem 0.5rem;
+      color: var(--text);
+      background: var(--surface-alt);
+      padding: 0.5rem 0.6rem;
       border: 1px solid var(--border);
-      border-radius: 5px;
+      border-radius: var(--radius-sm);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
     }
 
     .field-row {
@@ -273,21 +527,7 @@
       display: flex;
       justify-content: flex-end;
       gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .modal-actions button {
-      border-radius: 6px;
-      padding: 0.45rem 0.9rem;
-      border: 1px solid var(--border);
-      background: #fff;
-    }
-
-    #modal-submit-btn {
-      background: var(--text);
-      color: #fff;
-      border-color: var(--text);
-      font-weight: 600;
+      margin-top: 0.5rem;
     }
   </style>
 </head>
@@ -297,7 +537,10 @@
       <h1>Task Tracker</h1>
       <p>Module 3 — Kanban board</p>
     </div>
-    <button type="button" id="new-task-btn">New Task</button>
+    <button type="button" id="new-task-btn" class="btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+      New Task
+    </button>
   </header>
 
   <p id="board-banner" role="status" aria-live="polite"></p>
@@ -306,7 +549,9 @@
     <form id="task-form" novalidate>
       <div class="modal-header">
         <h2 id="task-modal-heading">New Task</h2>
-        <button type="button" id="modal-close-btn" aria-label="Close">&times;</button>
+        <button type="button" id="modal-close-btn" class="icon-btn" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
       </div>
 
       <p class="modal-error" id="modal-error" role="alert"></p>
@@ -347,25 +592,25 @@
       </div>
 
       <div class="modal-actions">
-        <button type="button" id="modal-cancel-btn">Cancel</button>
-        <button type="submit" id="modal-submit-btn">Save</button>
+        <button type="button" id="modal-cancel-btn" class="btn-secondary">Cancel</button>
+        <button type="submit" id="modal-submit-btn" class="btn-primary">Save</button>
       </div>
     </form>
   </dialog>
 
   <main class="board" aria-label="Task board">
     <section class="column" data-status="ToDo" aria-labelledby="column-todo-heading">
-      <h2 id="column-todo-heading"><span class="column-label" data-label-for="ToDo"></span> <span class="column-count" data-count-for="ToDo"></span></h2>
+      <h2 id="column-todo-heading"><span class="status-dot" aria-hidden="true"></span><span class="column-label" data-label-for="ToDo"></span> <span class="column-count" data-count-for="ToDo"></span></h2>
       <ul class="card-list" data-status-list="ToDo"></ul>
     </section>
 
     <section class="column" data-status="InProgress" aria-labelledby="column-inprogress-heading">
-      <h2 id="column-inprogress-heading"><span class="column-label" data-label-for="InProgress"></span> <span class="column-count" data-count-for="InProgress"></span></h2>
+      <h2 id="column-inprogress-heading"><span class="status-dot" aria-hidden="true"></span><span class="column-label" data-label-for="InProgress"></span> <span class="column-count" data-count-for="InProgress"></span></h2>
       <ul class="card-list" data-status-list="InProgress"></ul>
     </section>
 
     <section class="column" data-status="Done" aria-labelledby="column-done-heading">
-      <h2 id="column-done-heading"><span class="column-label" data-label-for="Done"></span> <span class="column-count" data-count-for="Done"></span></h2>
+      <h2 id="column-done-heading"><span class="status-dot" aria-hidden="true"></span><span class="column-label" data-label-for="Done"></span> <span class="column-count" data-count-for="Done"></span></h2>
       <ul class="card-list" data-status-list="Done"></ul>
     </section>
   </main>
@@ -376,11 +621,43 @@
     const STATUS_LABELS = { ToDo: "To Do", InProgress: "In Progress", Done: "Done" };
     const PRIORITY_ORDER = { High: 0, Medium: 1, Low: 2 };
 
+    const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>';
+    const ICON_DELETE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>';
+    const ICON_EMPTY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"></rect><path d="M3 12h5l1.5 2h5L16 12h5"></path></svg>';
+
+    const AVATAR_COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"];
+
+    function getInitials(name) {
+      return name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((word) => word[0].toUpperCase())
+        .join("");
+    }
+
+    function avatarColor(name) {
+      let hash = 0;
+      for (const ch of name) {
+        hash = (hash * 31 + ch.charCodeAt(0)) % AVATAR_COLORS.length;
+      }
+      return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+    }
+
     const banner = document.getElementById("board-banner");
 
     function setBannerState(state, message) {
       banner.dataset.state = state;
-      banner.textContent = message || "";
+      banner.innerHTML = "";
+      if (state === "loading") {
+        const spinner = document.createElement("span");
+        spinner.className = "spinner";
+        spinner.setAttribute("aria-hidden", "true");
+        banner.appendChild(spinner);
+      }
+      if (message) {
+        banner.appendChild(document.createTextNode(message));
+      }
     }
 
     async function fetchTasks() {
@@ -420,27 +697,54 @@
       title.textContent = task.title;
       li.appendChild(title);
 
-      const meta = document.createElement("p");
-      meta.className = "card-meta";
+      const footer = document.createElement("div");
+      footer.className = "card-footer";
 
       const priority = document.createElement("span");
       priority.className = `priority-badge priority-${task.priority}`;
       priority.textContent = task.priority;
-      meta.appendChild(priority);
+      footer.appendChild(priority);
 
-      const assignee = document.createElement("span");
-      assignee.textContent = task.assignee || "Unassigned";
-      meta.appendChild(assignee);
+      const assigneeWrap = document.createElement("span");
+      assigneeWrap.className = "assignee";
+      const avatar = document.createElement("span");
+      if (task.assignee) {
+        avatar.className = "avatar";
+        avatar.style.background = avatarColor(task.assignee);
+        avatar.textContent = getInitials(task.assignee);
+        assigneeWrap.title = task.assignee;
+        assigneeWrap.appendChild(avatar);
+        const name = document.createElement("span");
+        name.textContent = task.assignee;
+        assigneeWrap.appendChild(name);
+      } else {
+        avatar.className = "avatar unassigned";
+        assigneeWrap.title = "Unassigned";
+        assigneeWrap.appendChild(avatar);
+      }
+      footer.appendChild(assigneeWrap);
+
+      const actions = document.createElement("span");
+      actions.className = "card-actions";
 
       const editBtn = document.createElement("button");
       editBtn.type = "button";
-      editBtn.className = "card-edit-btn";
-      editBtn.textContent = "Edit";
+      editBtn.className = "icon-btn edit";
+      editBtn.innerHTML = ICON_EDIT;
       editBtn.setAttribute("aria-label", `Edit ${task.title}`);
       editBtn.addEventListener("click", () => openEditModal(task));
-      meta.appendChild(editBtn);
+      actions.appendChild(editBtn);
 
-      li.appendChild(meta);
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "icon-btn delete";
+      deleteBtn.innerHTML = ICON_DELETE;
+      deleteBtn.setAttribute("aria-label", `Delete ${task.title}`);
+      deleteBtn.addEventListener("click", () => handleDeleteClick(task));
+      actions.appendChild(deleteBtn);
+
+      footer.appendChild(actions);
+      li.appendChild(footer);
 
       li.addEventListener("dragstart", (event) => {
         // event.target during a native dragstart isn't guaranteed to be an
@@ -449,7 +753,7 @@
         // node itself, which has no .closest(). Normalize to the nearest
         // Element first.
         const targetEl = event.target instanceof Element ? event.target : event.target.parentElement;
-        if (targetEl && targetEl.closest(".card-edit-btn")) {
+        if (targetEl && targetEl.closest(".icon-btn")) {
           event.preventDefault();
           return;
         }
@@ -480,7 +784,10 @@
         if (columnTasks.length === 0) {
           const placeholder = document.createElement("li");
           placeholder.className = "empty-placeholder";
-          placeholder.textContent = "No tasks";
+          placeholder.innerHTML = ICON_EMPTY;
+          const text = document.createElement("span");
+          text.textContent = "No tasks";
+          placeholder.appendChild(text);
           listEl.appendChild(placeholder);
           continue;
         }
@@ -539,6 +846,32 @@
       } catch (error) {
         setBannerState("error", `Couldn't load tasks: ${error.message}`);
       }
+    }
+
+    async function deleteTask(taskId) {
+      let deleteError = null;
+      try {
+        const response = await fetch(`${API_BASE}/tasks/${taskId}`, { method: "DELETE" });
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          deleteError = typeof body.detail === "string" ? body.detail : `Request failed with status ${response.status}`;
+        }
+      } catch (error) {
+        deleteError = error.message;
+      }
+
+      try {
+        await refreshBoard();
+        setBannerState(deleteError ? "error" : "ready", deleteError ? `Couldn't delete task: ${deleteError}` : "");
+      } catch (error) {
+        setBannerState("error", `Couldn't load tasks: ${error.message}`);
+      }
+    }
+
+    function handleDeleteClick(task) {
+      const confirmed = window.confirm(`Delete "${task.title}"? This can't be undone.`);
+      if (!confirmed) return;
+      deleteTask(task.id);
     }
 
     function attachColumnDropHandlers() {
