@@ -189,6 +189,60 @@ an existing task).
 - Restoration proof: `git diff app/storage.py` → empty
 - Full suite after all six entries: `pytest -q` → 25 passed
 
+## Entry 7 — Real bug: drag crash when starting a drag from a text node
+
+**1. Bug or failure**
+Dragging a card in a real browser sometimes threw an uncaught exception
+instead of starting the drag, depending on exactly where on the card the
+drag gesture began.
+
+**2. Evidence**
+- Action performed: dragged a card between columns (user-reported, live
+  manual browser test, not simulated).
+- Failing behavior: browser console error, not a failed pytest.
+- Console output: `Uncaught TypeError: event.target.closest is not a
+  function` at `(index):446:26`, inside the card's `dragstart` listener in
+  `frontend/index.html`.
+- Relevant code: the `dragstart` handler added in X7 to stop the "Edit"
+  button from also starting a drag (`if (event.target.closest(".card-edit-btn"))`).
+
+**3. AI diagnosis**
+Root cause: `event.target` during a native `dragstart` is not guaranteed to
+be an `Element`. If the drag gesture starts exactly on rendered text inside
+the card (a Text node child of `<p class="card-title">` or one of the
+`<span>`s), some browsers report `event.target` as that Text node itself.
+Text nodes inherit from `Node`/`CharacterData`, not `Element`, so they have
+no `.closest()` method, crashing the handler before the drag could even
+begin. This was never caught by the Node-based logic verification in X6/X7
+because that verification called `handleDrop()` directly with plain
+arguments — it never actually dispatched a synthetic `dragstart` event
+through a DOM, so the `event.target` type quirk was invisible to it. Only
+real browser interaction surfaced it.
+
+Fix (`frontend/index.html`, `renderCard`'s `dragstart` listener): normalize
+`event.target` to its nearest Element before calling `.closest()`:
+`event.target instanceof Element ? event.target : event.target.parentElement`.
+For a Text node, `.parentElement` is always the actual Element containing
+it, so this is a correct, complete fix, not a workaround.
+
+**4. Decision**
+`ACCEPTED` — this is a source-cause fix (correcting an incorrect assumption
+about `event.target`'s type), not a symptom suppression. No `try/catch` was
+added around the crash; the underlying type mismatch was fixed directly.
+
+**Verification after the decision**
+- Targeted check: static checks (HTML tag-balance, `node --check`) both
+  clean after the fix.
+- Full suite: `pytest -q` → 25 passed (frontend-only change, backend
+  unaffected).
+- Browser contract item(s): **CONFIRMED by user** after a hard refresh —
+  dragged a card again, no `Uncaught TypeError` in the console, red error
+  banner appeared correctly on a rejected transition, and the card stayed in
+  its correct column. This is the first behavior-contract item in this
+  project actually observed in a real browser rather than logic-verified
+  via Node, and it caught a real bug the Node-based verification couldn't
+  see (see root cause above).
+
 ---
 
 # Reflection

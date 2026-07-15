@@ -443,7 +443,13 @@
       li.appendChild(meta);
 
       li.addEventListener("dragstart", (event) => {
-        if (event.target.closest(".card-edit-btn")) {
+        // event.target during a native dragstart isn't guaranteed to be an
+        // Element: if the drag starts exactly on a text node (e.g. pressing
+        // down on the card's rendered text), some browsers report the Text
+        // node itself, which has no .closest(). Normalize to the nearest
+        // Element first.
+        const targetEl = event.target instanceof Element ? event.target : event.target.parentElement;
+        if (targetEl && targetEl.closest(".card-edit-btn")) {
           event.preventDefault();
           return;
         }
