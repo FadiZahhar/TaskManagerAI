@@ -8,6 +8,7 @@ modules rather than defined inline.
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import health
 from app.business_rules import validate_status_transition
@@ -21,6 +22,16 @@ app = FastAPI(
         "task CRUD arrives in later modules."
     ),
     version="0.1.0",
+)
+
+# Module 3 frontend (frontend/index.html) is served locally on a different
+# origin than this API. Restricted to the actual local dev origins used to
+# serve it; no wildcard.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5500", "http://localhost:5500"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Content-Type"],
 )
 
 app.include_router(health.router)

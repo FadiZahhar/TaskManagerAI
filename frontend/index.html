@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Task Tracker</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --gap: 1rem;
+      --column-bg: #f4f5f7;
+      --card-bg: #ffffff;
+      --border: #d9dce1;
+      --text: #1f2328;
+      --muted: #6b7280;
+      --high: #c0392b;
+      --medium: #b7791f;
+      --low: #2f855a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: #ffffff;
+    }
+
+    header.app-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    header.app-header h1 {
+      margin: 0;
+      font-size: 1.375rem;
+    }
+
+    header.app-header p {
+      margin: 0.25rem 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    #new-task-btn {
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    main.board {
+      display: flex;
+      gap: var(--gap);
+      padding: 1.5rem;
+      align-items: flex-start;
+    }
+
+    section.column {
+      flex: 1 1 0;
+      min-width: 0;
+      background: var(--column-bg);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+
+    section.column h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    ul.card-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-height: 3rem;
+    }
+
+    li.card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.65rem 0.75rem;
+      cursor: grab;
+    }
+
+    li.card.dragging {
+      opacity: 0.5;
+    }
+
+    ul.card-list.drag-over {
+      outline: 2px dashed var(--muted);
+      outline-offset: 2px;
+    }
+
+    li.card .card-title {
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+    }
+
+    li.card .card-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .card-edit-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text);
+    }
+
+    .priority-badge {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.03em;
+    }
+
+    .priority-High {
+      color: var(--high);
+    }
+
+    .priority-Medium {
+      color: var(--medium);
+    }
+
+    .priority-Low {
+      color: var(--low);
+    }
+
+    .column-count {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .empty-placeholder {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-style: italic;
+      padding: 0.5rem 0.1rem;
+    }
+
+    #board-banner {
+      margin: 0 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    #board-banner[data-state="loading"] {
+      color: var(--muted);
+    }
+
+    #board-banner[data-state="error"] {
+      color: var(--high);
+      font-weight: 600;
+    }
+
+    #board-banner:empty {
+      display: none;
+    }
+
+    @media (max-width: 720px) {
+      main.board {
+        flex-direction: column;
+      }
+
+      section.column {
+        width: 100%;
+      }
+    }
+
+    dialog#task-modal {
+      border: none;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem 1.5rem;
+      width: min(420px, 90vw);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    dialog#task-modal::backdrop {
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    #modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      line-height: 1;
+      color: var(--muted);
+      padding: 0.1rem 0.4rem;
+    }
+
+    .modal-error {
+      color: var(--high);
+      font-size: 0.85rem;
+      min-height: 1.1em;
+      margin: 0 0 0.5rem;
+    }
+
+    .field {
+      margin-bottom: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      font: inherit;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .field-row .field {
+      flex: 1 1 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .modal-actions button {
+      border-radius: 6px;
+      padding: 0.45rem 0.9rem;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    #modal-submit-btn {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>Task Tracker</h1>
+      <p>Module 3 — Kanban board</p>
+    </div>
+    <button type="button" id="new-task-btn">New Task</button>
+  </header>
+
+  <p id="board-banner" role="status" aria-live="polite"></p>
+
+  <dialog id="task-modal" aria-labelledby="task-modal-heading">
+    <form id="task-form" novalidate>
+      <div class="modal-header">
+        <h2 id="task-modal-heading">New Task</h2>
+        <button type="button" id="modal-close-btn" aria-label="Close">&times;</button>
+      </div>
+
+      <p class="modal-error" id="modal-error" role="alert"></p>
+
+      <div class="field">
+        <label for="task-title">Title</label>
+        <input type="text" id="task-title" name="title" maxlength="200" />
+      </div>
+
+      <div class="field">
+        <label for="task-description">Description</label>
+        <textarea id="task-description" name="description" rows="3"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="task-status">Status</label>
+          <select id="task-status" name="status">
+            <option value="ToDo">To Do</option>
+            <option value="InProgress">In Progress</option>
+            <option value="Done">Done</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="task-priority">Priority</label>
+          <select id="task-priority" name="priority">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="task-assignee">Assignee</label>
+        <input type="text" id="task-assignee" name="assignee" />
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="modal-cancel-btn">Cancel</button>
+        <button type="submit" id="modal-submit-btn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <main class="board" aria-label="Task board">
+    <section class="column" data-status="ToDo" aria-labelledby="column-todo-heading">
+      <h2 id="column-todo-heading"><span class="column-label" data-label-for="ToDo"></span> <span class="column-count" data-count-for="ToDo"></span></h2>
+      <ul class="card-list" data-status-list="ToDo"></ul>
+    </section>
+
+    <section class="column" data-status="InProgress" aria-labelledby="column-inprogress-heading">
+      <h2 id="column-inprogress-heading"><span class="column-label" data-label-for="InProgress"></span> <span class="column-count" data-count-for="InProgress"></span></h2>
+      <ul class="card-list" data-status-list="InProgress"></ul>
+    </section>
+
+    <section class="column" data-status="Done" aria-labelledby="column-done-heading">
+      <h2 id="column-done-heading"><span class="column-label" data-label-for="Done"></span> <span class="column-count" data-count-for="Done"></span></h2>
+      <ul class="card-list" data-status-list="Done"></ul>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+    const STATUSES = ["ToDo", "InProgress", "Done"];
+    const STATUS_LABELS = { ToDo: "To Do", InProgress: "In Progress", Done: "Done" };
+    const PRIORITY_ORDER = { High: 0, Medium: 1, Low: 2 };
+
+    const banner = document.getElementById("board-banner");
+
+    function setBannerState(state, message) {
+      banner.dataset.state = state;
+      banner.textContent = message || "";
+    }
+
+    async function fetchTasks() {
+      const response = await fetch(`${API_BASE}/tasks`);
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    }
+
+    function groupByStatus(tasks) {
+      const groups = { ToDo: [], InProgress: [], Done: [] };
+      for (const task of tasks) {
+        if (groups[task.status]) {
+          groups[task.status].push(task);
+        }
+      }
+      return groups;
+    }
+
+    function sortTasks(tasks) {
+      return [...tasks].sort((a, b) => {
+        const priorityDiff = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+      });
+    }
+
+    function renderCard(task) {
+      const li = document.createElement("li");
+      li.className = "card";
+      li.dataset.taskId = task.id;
+      li.draggable = true;
+
+      const title = document.createElement("p");
+      title.className = "card-title";
+      title.textContent = task.title;
+      li.appendChild(title);
+
+      const meta = document.createElement("p");
+      meta.className = "card-meta";
+
+      const priority = document.createElement("span");
+      priority.className = `priority-badge priority-${task.priority}`;
+      priority.textContent = task.priority;
+      meta.appendChild(priority);
+
+      const assignee = document.createElement("span");
+      assignee.textContent = task.assignee || "Unassigned";
+      meta.appendChild(assignee);
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "card-edit-btn";
+      editBtn.textContent = "Edit";
+      editBtn.setAttribute("aria-label", `Edit ${task.title}`);
+      editBtn.addEventListener("click", () => openEditModal(task));
+      meta.appendChild(editBtn);
+
+      li.appendChild(meta);
+
+      li.addEventListener("dragstart", (event) => {
+        if (event.target.closest(".card-edit-btn")) {
+          event.preventDefault();
+          return;
+        }
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", JSON.stringify({ id: task.id, status: task.status }));
+        li.classList.add("dragging");
+      });
+      li.addEventListener("dragend", () => {
+        li.classList.remove("dragging");
+      });
+
+      return li;
+    }
+
+    function renderBoard(tasks) {
+      const groups = groupByStatus(tasks);
+
+      for (const status of STATUSES) {
+        const listEl = document.querySelector(`[data-status-list="${status}"]`);
+        const labelEl = document.querySelector(`[data-label-for="${status}"]`);
+        const countEl = document.querySelector(`[data-count-for="${status}"]`);
+        const columnTasks = sortTasks(groups[status]);
+
+        listEl.innerHTML = "";
+        labelEl.textContent = STATUS_LABELS[status];
+        countEl.textContent = `(${columnTasks.length})`;
+
+        if (columnTasks.length === 0) {
+          const placeholder = document.createElement("li");
+          placeholder.className = "empty-placeholder";
+          placeholder.textContent = "No tasks";
+          listEl.appendChild(placeholder);
+          continue;
+        }
+
+        for (const task of columnTasks) {
+          listEl.appendChild(renderCard(task));
+        }
+      }
+    }
+
+    async function refreshBoard() {
+      const tasks = await fetchTasks();
+      renderBoard(tasks);
+    }
+
+    async function loadBoard() {
+      setBannerState("loading", "Loading tasks…");
+      try {
+        await refreshBoard();
+        setBannerState("ready", "");
+      } catch (error) {
+        setBannerState("error", `Couldn't load tasks: ${error.message}`);
+      }
+    }
+
+    const inFlightUpdates = new Set();
+
+    async function handleDrop(taskId, originalStatus, newStatus) {
+      if (originalStatus === newStatus) return; // same-column drop: no PATCH
+      if (inFlightUpdates.has(taskId)) return; // avoid duplicate in-flight updates
+
+      inFlightUpdates.add(taskId);
+      let dragError = null;
+      try {
+        const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          dragError = typeof body.detail === "string" ? body.detail : `Request failed with status ${response.status}`;
+        }
+      } catch (error) {
+        dragError = error.message;
+      } finally {
+        inFlightUpdates.delete(taskId);
+      }
+
+      // Backend is the sole authority on transition validity: always
+      // reconcile with server truth after the attempt, whether it
+      // succeeded or was rejected.
+      try {
+        await refreshBoard();
+        setBannerState(dragError ? "error" : "ready", dragError ? `Couldn't move task: ${dragError}` : "");
+      } catch (error) {
+        setBannerState("error", `Couldn't load tasks: ${error.message}`);
+      }
+    }
+
+    function attachColumnDropHandlers() {
+      for (const status of STATUSES) {
+        const listEl = document.querySelector(`[data-status-list="${status}"]`);
+
+        listEl.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+        });
+        listEl.addEventListener("dragenter", () => {
+          listEl.classList.add("drag-over");
+        });
+        listEl.addEventListener("dragleave", () => {
+          listEl.classList.remove("drag-over");
+        });
+        listEl.addEventListener("drop", (event) => {
+          event.preventDefault();
+          listEl.classList.remove("drag-over");
+
+          const raw = event.dataTransfer.getData("text/plain");
+          if (!raw) return;
+
+          let dragged;
+          try {
+            dragged = JSON.parse(raw);
+          } catch (error) {
+            return;
+          }
+
+          handleDrop(dragged.id, dragged.status, status);
+        });
+      }
+    }
+
+    const modal = document.getElementById("task-modal");
+    const taskForm = document.getElementById("task-form");
+    const modalHeading = document.getElementById("task-modal-heading");
+    const modalError = document.getElementById("modal-error");
+    const titleInput = document.getElementById("task-title");
+    const descriptionInput = document.getElementById("task-description");
+    const statusSelect = document.getElementById("task-status");
+    const prioritySelect = document.getElementById("task-priority");
+    const assigneeInput = document.getElementById("task-assignee");
+
+    let editingTaskId = null;
+    let editingOriginalStatus = null;
+
+    function resetModalForm() {
+      editingTaskId = null;
+      editingOriginalStatus = null;
+      taskForm.reset();
+      modalError.textContent = "";
+    }
+
+    function openCreateModal() {
+      resetModalForm();
+      modalHeading.textContent = "New Task";
+      statusSelect.value = "ToDo";
+      prioritySelect.value = "Medium";
+      modal.showModal();
+    }
+
+    function openEditModal(task) {
+      editingTaskId = task.id;
+      editingOriginalStatus = task.status;
+      modalError.textContent = "";
+      modalHeading.textContent = "Edit Task";
+      titleInput.value = task.title;
+      descriptionInput.value = task.description || "";
+      statusSelect.value = task.status;
+      prioritySelect.value = task.priority;
+      assigneeInput.value = task.assignee || "";
+      modal.showModal();
+    }
+
+    document.getElementById("new-task-btn").addEventListener("click", openCreateModal);
+    document.getElementById("modal-cancel-btn").addEventListener("click", () => modal.close());
+    document.getElementById("modal-close-btn").addEventListener("click", () => modal.close());
+
+    // Every dismissal path (Cancel, X, Escape, backdrop click) ends in the
+    // dialog's native 'close' event, so stale id/values/errors are cleared
+    // in exactly one place regardless of how the modal was dismissed.
+    modal.addEventListener("close", resetModalForm);
+
+    // Escape and Cancel/X all call modal.close() (or fire the dialog's
+    // native 'cancel' event) which is enough; clicking the backdrop needs
+    // this explicit check so clicks inside the dialog content don't close it.
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        modal.close();
+      }
+    });
+
+    taskForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const trimmedTitle = titleInput.value.trim();
+      if (!trimmedTitle) {
+        modalError.textContent = "Title is required.";
+        return; // client-side only: no network request for a blank title
+      }
+
+      const trimmedAssignee = assigneeInput.value.trim();
+      const payload = {
+        title: trimmedTitle,
+        description: descriptionInput.value,
+        priority: prioritySelect.value,
+        assignee: trimmedAssignee === "" ? null : trimmedAssignee,
+      };
+
+      const isEdit = editingTaskId !== null;
+      if (isEdit) {
+        // Only send status if it actually changed: the backend rejects a
+        // same->same status PATCH as an invalid transition (see
+        // app/business_rules.py), so sending the unchanged value on every
+        // save would break plain title/description edits.
+        if (statusSelect.value !== editingOriginalStatus) {
+          payload.status = statusSelect.value;
+        }
+      } else {
+        payload.status = statusSelect.value;
+      }
+
+      const url = isEdit ? `${API_BASE}/tasks/${editingTaskId}` : `${API_BASE}/tasks`;
+      const method = isEdit ? "PATCH" : "POST";
+
+      let response;
+      try {
+        response = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (error) {
+        modalError.textContent = `Couldn't save task: ${error.message}`;
+        return;
+      }
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        modalError.textContent =
+          typeof body.detail === "string" ? body.detail : `Request failed with status ${response.status}`;
+        return; // keep modal open, values intact, per the 422 contract
+      }
+
+      modal.close(); // success: clears errors, closes, resets via 'close' listener
+
+      try {
+        await refreshBoard();
+        setBannerState("ready", "");
+      } catch (error) {
+        setBannerState("error", `Couldn't load tasks: ${error.message}`);
+      }
+    });
+
+    attachColumnDropHandlers();
+    loadBoard();
+  </script>
+</body>
+</html>
