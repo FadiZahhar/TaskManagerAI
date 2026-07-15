@@ -6,23 +6,42 @@
 
 | Item | Evidence |
 |---|---|
-| Date/time | `[YYYY-MM-DD HH:MM TZ]` |
-| Branch before work | `[BRANCH]` |
-| Required branch created/switched | `mid-course-project — PASS/FAIL` |
-| Starting commit | `[HASH]` |
-| Git status | `[CLEAN OR DESCRIBE EXISTING CHANGES]` |
-| Backend start command | `[COMMAND]` |
-| Frontend start/open command | `[COMMAND]` |
-| Baseline pytest command | `[COMMAND]` |
-| Baseline pytest result | `[N PASSED / FAILURES / DURATION]` |
-| Baseline app/API smoke check | `[OBSERVATION OR NOT RUN]` |
-| Baseline browser check | `[OBSERVATION OR NOT RUN]` |
+| Date/time | `2026-07-16` |
+| Branch before work | `mid-course-project` |
+| Required branch created/switched | `mid-course-project — PASS` |
+| Starting commit | `3915bb1` |
+| Git status | `CLEAN` |
+| Backend start command | `uvicorn app.main:app --reload` |
+| Frontend start/open command | `python3 -m http.server 5500 --directory frontend` |
+| Baseline pytest command | `.venv/bin/python -m pytest -q` |
+| Baseline pytest result | `25 passed, 3 warnings in 0.07s` |
+| Baseline app/API smoke check | `NOT RUN (live uvicorn not started; API exercised via FastAPI TestClient instead)` |
+| Baseline browser check | `NOT RUN (no browser control in this session)` |
 
 Existing failures, if any, before feature work:
 
 ```text
-[PASTE CONCISE REAL OUTPUT OR WRITE NONE]
+NONE (25 passed). The 3 warnings are a pre-existing FastAPI DeprecationWarning
+about HTTP_422_UNPROCESSABLE_ENTITY in app/main.py, unrelated to this work.
 ```
+
+### Feature 1 backend implementation — automated evidence (observed)
+
+Backend implemented (models/storage/route) per `mini-adr.md`. Formal pytest
+coverage for Feature 1 (Prompt 05) is still **outstanding** — not yet added.
+
+```text
+Static check: python -m py_compile app/{models,storage,main}.py → OK
+Full suite after Feature 1 backend: .venv/bin/python -m pytest -q → 25 passed, 3 warnings
+Frontend JS syntax: node --check (extracted <script>) → OK
+```
+
+Ad-hoc backend smoke (FastAPI TestClient, scratchpad script, not committed) — all
+20 assertions PASS: valid create echoes ISO `due_date`; invalid date (`2026-13-40`,
+`not-a-date`) → 422; past-due ToDo/InProgress → `overdue:true`; due-today → false;
+Done past-due → false; `?overdue=true/false` filters correctly; PATCH set/clear
+(`due_date:null`) works and leaves unrelated fields unchanged; response shape is
+additive (`due_date` + `overdue` on every task).
 
 ## 2. New backend tests
 
@@ -61,6 +80,15 @@ Result: [REAL SUMMARY]
 ```
 
 ## 3. Manual browser checks — Feature 1
+
+> Browser control was **unavailable** in the implementation session, so every row
+> below is **NOT RUN**. To run them: start the backend
+> (`uvicorn app.main:app --reload`) and frontend
+> (`python3 -m http.server 5500 --directory frontend`), open
+> <http://127.0.0.1:5500>, and open DevTools → Network. The invalid-date case is
+> not reachable from the native date picker; force it via the Network panel (re-send
+> a create/edit with `"due_date":"2026-13-40"`) and confirm a 422 with the modal
+> error shown and no false success.
 
 | Check | Exact action | Expected | Evidence | Status |
 |---|---|---|---|---|

@@ -1,10 +1,10 @@
 """Pydantic models for the Task domain (Module 2)."""
 
-from datetime import datetime
+from datetime import date, datetime, timezone
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, computed_field, field_validator
 
 
 class TaskStatus(str, Enum):
@@ -19,6 +19,17 @@ class TaskPriority(str, Enum):
     HIGH = "High"
 
 
+def is_overdue(due_date: Optional[date], status: TaskStatus, today: date) -> bool:
+    """Single source of truth for overdue semantics (see ADR-2).
+
+    Overdue means the task has a due date strictly before ``today`` and is not
+    completed. A task due today is not overdue; a Done task is never overdue.
+    """
+    if due_date is None or status == TaskStatus.DONE:
+        return False
+    return due_date < today
+
+
 class TaskCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -27,6 +38,7 @@ class TaskCreate(BaseModel):
     status: TaskStatus = TaskStatus.TODO
     priority: TaskPriority = TaskPriority.MEDIUM
     assignee: Optional[str] = None
+    due_date: Optional[date] = None
 
     @field_validator("title")
     @classmethod
@@ -47,6 +59,7 @@ class TaskUpdate(BaseModel):
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
     assignee: Optional[str] = None
+    due_date: Optional[date] = None
 
     @field_validator("title")
     @classmethod
@@ -70,5 +83,12 @@ class TaskResponse(BaseModel):
     status: TaskStatus
     priority: TaskPriority
     assignee: Optional[str]
+    due_date: Optional[date] = None
     created_at: datetime
     updated_at: datetime
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def overdue(self) -> bool:
+        """Derived overdue flag (ADR-2); never stored, computed per response."""
+        return is_overdue(self.due_date, self.status, datetime.now(timezone.utc).date())
