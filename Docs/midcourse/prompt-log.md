@@ -123,66 +123,54 @@ Return acceptance criteria, exact likely files/symbols, risks, proposed targeted
 [PASTE EXACT PROMPT SENT]
 ```
 
-**AI response summary:** `[WHAT CLAUDE FOUND AND PROPOSED]`
+**AI response summary:** A 4-perspective design workflow (backend / test-matrix / frontend / adversarial), grounded in the repo, proposed query params `search` (case-insensitive substring over title AND description, trimmed, blank→omitted) and `assignee` (case-insensitive EXACT, both sides trimmed, None-safe); all filters compose with logical AND in `storage.get_all_tasks`; unchanged 422 enum validation; server-side only. Frontend: a compact filter bar via `URLSearchParams`, a sequence-id stale guard, debounce, and a Clear button.
 
 **Human review:**
 
-- Accepted: `[ITEMS]`
-- Edited: `[ITEMS AND WHY]`
-- Rejected: `[ITEMS AND WHY]`
-- Corrected AI assumption: `[REQUIRED — AT LEAST ONE FOR THIS FEATURE]`
+- Accepted: extend the existing `GET /tasks` endpoint; `search`/`assignee` names; server-side filtering.
+- Edited: none at plan time.
+- Rejected: none.
+- Corrected AI assumption: rejected the naive "fetch all tasks once and filter in JavaScript" approach in favour of extending `GET /tasks` and testing query behavior; the client only sends filters and renders the server result.
 
 ### F2-P2 — Backend filtering implementation
 
 **Prompt used:** See Prompt 10.
 
-```text
-[PASTE EXACT PROMPT SENT]
-```
-
-**AI response summary:** `[COMPLETE]`
+**AI response summary:** Added `search` + `assignee` params to `list_tasks` and `get_all_tasks` as two AND-composed comprehension blocks; search is case-insensitive substring over title OR description, trimmed, blank→omitted; assignee is case-insensitive exact, both sides trimmed and None-safe. Applied one adversarial-review hardening (trim the stored assignee too). No model/frontend/test change.
 
 **Human review:**
 
-- Accepted: `[COMPLETE]`
-- Edited: `[COMPLETE]`
-- Rejected: `[COMPLETE]`
+- Accepted: the full backend diff + the symmetric-assignee-trim hardening.
+- Edited: none.
+- Rejected: none.
 
-**Verification:** `[TARGETED COMMAND + RESULT]`
+**Verification:** import OK; nearest tests 13 passed; full suite 41 passed; ad-hoc TestClient smoke confirmed search / AND / assignee / invalid-enum-422 / no-mutation.
 
 ### F2-P3 — Focused pytest coverage
 
 **Prompt used:** See Prompt 11.
 
-```text
-[PASTE EXACT PROMPT SENT]
-```
-
-**AI response summary:** `[COMPLETE]`
+**AI response summary:** Added `tests/test_search_filters.py` — 19 tests (shared fixtures, public-API setup, set-based assertions): search title / description-only / title-or-description, case-insensitive, whitespace-trim, blank & empty → no search, no-match 200 `[]`, regex-metachar matches literally (no ReDoS/500), status+priority / search+status / search+overdue AND, assignee exact CI, assignee-not-substring, invalid status/priority 422, combined invalid-enum+search 422, unfiltered regression, no mutation.
 
 **Human review:**
 
-- Accepted test cases: `[COMPLETE]`
-- Assertions strengthened or setup edited: `[COMPLETE]`
-- Rejected test or weak assertion: `[COMPLETE]`
+- Accepted test cases: all 19.
+- Assertions strengthened or setup edited: set-based (order-insensitive) assertions; assert status **plus** meaningful body.
+- Rejected test or weak assertion: none.
 
 ### F2-P4 — Frontend search/filter bar
 
 **Prompt used:** See Prompt 12.
 
-```text
-[PASTE EXACT PROMPT SENT]
-```
-
-**AI response summary:** `[COMPLETE]`
+**AI response summary:** Added the compact filter bar (search input, status/priority selects carrying enum VALUES, assignee input, overdue checkbox, Clear). `buildTaskQuery` uses `URLSearchParams` (encoding), omits blank/empty, and never sends `overdue=false`. `loadBoard` gained a sequence-id stale-response guard; text inputs are debounced; Clear resets controls + one unfiltered fetch. No new dependency; single-file change.
 
 **Human review:**
 
-- Accepted: `[COMPLETE]`
-- Edited: `[COMPLETE]`
-- Rejected: `[COMPLETE]`
+- Accepted: the frontend diff.
+- Edited: none.
+- Rejected: none.
 
-**Browser evidence:** `[PASS/FAIL/NOT RUN + LOCATION]`
+**Browser evidence:** PASS — 22/22 headless-Chrome (CDP, Network-captured) checks; see `verification.md` §4.
 
 ### F2-P5 — Break Test and debugging evidence
 

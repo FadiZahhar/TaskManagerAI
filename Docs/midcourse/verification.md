@@ -166,6 +166,26 @@ unreachable from the native date picker, so it is verified at the API/422 level.
 | Stale-response / debounce | Type 6 chars rapidly. | Few requests; final state correct. | Debounce collapsed 6 keystrokes → **1** request; board = `report` results. | PASS |
 | Preserved flows | Create + drag with bar present. | Existing flows still work. | New task created; drag `ToDo→InProgress` persisted, filter bar unaffected. | PASS |
 
+### Feature 2 verification — Prompt 13 (per requested item)
+
+Automated re-run this pass; browser rows observed at commit `4e5abad` (frontend
+byte-identical to HEAD, so the evidence stands). All PASS; no FAIL; no code change.
+
+| Requested item | Status | Evidence |
+|---|---|---|
+| Targeted Feature 2 tests | PASS | `pytest tests/test_search_filters.py` → `19 passed` |
+| Full pytest suite | PASS | `pytest -q` → `60 passed, 3 warnings` (25 + 16 F1 + 19 F2) |
+| Title search | PASS | `test_search_matches_title`; browser §4: `GET ?search=report` → `Write report` |
+| Description search | PASS | `test_search_matches_description_only`; browser §4: `search=report` also returns `Email vendor` (desc) |
+| Case-insensitive result | PASS | `test_search_is_case_insensitive`; browser §4: `REPORT` returns same 2 cards |
+| Combined filter AND | PASS | `test_status_and_priority_use_and` / `_search_and_status_` / `_search_and_overdue_`; browser §4: `?search=report&status=ToDo` → only `Write report` |
+| No-match 200/[] + UI empty state | PASS | `test_search_no_match_returns_200_and_empty_list`; browser §4: 0 cards, all cols `No tasks (0)`, banner `ready` |
+| Invalid filter API behavior | PASS | `test_invalid_status/priority_filter_returns_422`, `_invalid_enum_with_valid_search_still_returns_422`; browser: selects only emit valid enums, empty select omits param (no false 422) |
+| Reset to unfiltered board | PASS | Browser §4: Clear resets all controls + single `GET /tasks`; 4 cards restored |
+| Existing F1 + Module 1–3 UI flows | PASS | Full suite `60 passed` (all M1–3 + F1 tests); browser §4: create + drag preserved with the bar present; F1 board browser pass at §3 (53/53) unaffected (code identical) |
+
+**No FAIL found; no source change made this phase.**
+
 ## 5. Behavior contract before refactor
 
 Copy the completed statuses from `behavior-contract.md` and add evidence references.
