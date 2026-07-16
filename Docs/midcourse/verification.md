@@ -283,21 +283,21 @@ A third Feature 1 Break Test on a different function/module than #1 and #2 (whic
 
 | Item | Evidence |
 |---|---|
-| Working checkpoint before refactor | `[HASH]` |
-| Refactor target | `[ONE FUNCTION/SECTION]` |
-| Reason | `[READABILITY/DUPLICATION/STRUCTURE]` |
-| Files/symbols changed | `[COMPLETE]` |
-| AI proposal accepted/edited/rejected | `[COMPLETE]` |
-| Targeted checks | `[COMMANDS + RESULTS]` |
-| Full pytest result | `[RESULT]` |
-| Browser contract result | `[RESULT]` |
+| Working checkpoint before refactor | `f2d750f` (tree clean) |
+| Refactor target | `frontend/index.html` → `buildTaskQuery()` (single function) |
+| Reason | Duplication: the "read value, trim, set param only if non-empty" rule was repeated in two spellings across four controls. Extracted one local `setIf(name, value)` helper so the omit-blank rule is stated once. |
+| Files/symbols changed | Only `frontend/index.html::buildTaskQuery` (diff confined to that function; no unrelated cleanup). |
+| AI proposal accepted/edited/rejected | Accepted as proposed (16A); rejected the higher-risk backend `get_all_tasks` alternative. |
+| Targeted checks | `node --check` on extracted `<script>` → OK. After-refactor browser check (headless Chrome, Network-captured request URLs): **10/10 PASS** — every produced query byte-identical (`?search=report`, `?status=InProgress`, `All statuses`→`/tasks`, `?priority=High`, `?assignee=dana+lee`, `?search=a+%26+b`, `?search=report&status=ToDo`, `?overdue=true`, unchecked→`/tasks` no `overdue=false`, clear→single `/tasks`). |
+| Full pytest result | `.venv/bin/python -m pytest -q` → `60 passed, 3 warnings` (backend untouched). |
+| Browser contract result | Query-driven contract items (2, 10–14) re-verified via the 10/10 identical request URLs; non-query items unchanged code. No behavior change observed. |
 
 ## 9. Behavior contract after refactor
 
-- Result: `[__ / 16 PASS]`
-- Regressions found: `[NONE OR DESCRIBE]`
-- Corrections made: `[COMPLETE]`
-- Remaining `NOT RUN` items: `[COMPLETE]`
+- Result: **16 / 16 PASS**, 0 FAIL, 0 NOT RUN
+- Regressions found: none — every after-refactor request URL is byte-identical to before; `60 passed`
+- Corrections made: none (no source failure; one harness wait-timing artifact in the check driver was fixed, not app code)
+- Remaining `NOT RUN` items: none
 
 ## 10. Final repository hygiene
 

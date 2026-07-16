@@ -791,12 +791,14 @@
       // the "All …" (value="") select options are OMITTED, not sent: an empty
       // enum like ?status= would be rejected by the backend as invalid.
       const params = new URLSearchParams();
-      const search = filterSearch.value.trim();
-      if (search) params.set("search", search);
-      if (filterStatus.value) params.set("status", filterStatus.value);
-      if (filterPriority.value) params.set("priority", filterPriority.value);
-      const assignee = filterAssignee.value.trim();
-      if (assignee) params.set("assignee", assignee);
+      const setIf = (name, value) => {
+        const v = (value ?? "").trim();
+        if (v) params.set(name, v);
+      };
+      setIf("search", filterSearch.value);
+      setIf("status", filterStatus.value);
+      setIf("priority", filterPriority.value);
+      setIf("assignee", filterAssignee.value);
       if (overdueFilter.checked) params.set("overdue", "true"); // never send overdue=false
       const query = params.toString();
       return query ? `?${query}` : "";
