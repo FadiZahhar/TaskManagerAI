@@ -7,7 +7,8 @@
 | Tool | Purpose | Why selected |
 |---|---|---|
 | Claude Code | Repository inspection, planning, focused implementation, test drafting, diff review, and evidence-based debugging | Single agent that inspects the real repo, runs pytest/`py_compile`/`node --check`, and makes focused edits under the phased workflow. |
-| `[OTHER TOOL, IF USED]` | `[PURPOSE]` | `[REASON]` |
+| Headless Chrome via the DevTools Protocol (+ Node) | Live browser/Network verification of the frontend | Real JS + `fetch` + CORS + captured request URLs; no browser MCP tool was available, so Chrome was driven over CDP. |
+| pytest | Automated backend tests + regression suite | Repository's existing test runner (see `pytest.ini`). |
 
 ## Weak prompt rewritten into a stronger prompt
 
@@ -40,11 +41,7 @@ Return acceptance criteria, exact likely files/symbols, risks, proposed targeted
 
 ### F1-P1 — Repository-grounded feature plan
 
-**Prompt used:** See Prompt 03 in `claude-prompts.md` or paste the exact final prompt here.
-
-```text
-[PASTE EXACT PROMPT SENT]
-```
+**Prompt used:** Prompt 03 (see `claude-prompts.md`).
 
 **AI response summary:** Read-only plan (Prompt 03). Proposed `due_date: Optional[date]` on the three models following the `assignee` nullable precedent; `overdue` as a derived Pydantic computed field (not stored) backed by one predicate `is_overdue(due_date, status, today)`; an `overdue` query filter on the existing `GET /tasks`; and the frontend modal/card/toggle touchpoints. Flagged the missing `mini-adr.md` and two decisions to ratify.
 
@@ -101,15 +98,11 @@ Return acceptance criteria, exact likely files/symbols, risks, proposed targeted
 
 ### F1-P5 — Break Test and debugging evidence
 
-**Prompt used:** See Prompts 08A and 08B.
+**Prompt used:** Prompts 08A (propose) and 08B (execute) — run for three distinct Feature 1 Break Tests.
 
-```text
-[PASTE EXACT PROMPT(S) SENT]
-```
+**AI response summary:** Three controlled Break Tests, each pass → one temporary source mutation → expected semantic failure → restored pass, with clean Git (verification.md §6): **#1** strict-`<` boundary (`is_overdue` `<`→`<=`) breaks `test_due_today_is_not_overdue`; **#2** Done-exclusion (drop `status == TaskStatus.DONE`) breaks `test_completed_past_due_is_not_overdue`; **#3** filter logic (`==`→`!=` in `get_all_tasks`) breaks `test_overdue_filter_returns_only_past_due_incomplete`.
 
-**AI response summary:** `[COMPLETE]`
-
-**Human decision:** `[WHY THE MUTATION WAS SAFE AND WHY THE FAILURE PROVED THE TEST]`
+**Human decision:** Each mutation was safe because it touched only committed application source (restored with `git checkout`, test file unchanged) and targeted a distinct code path — predicate boundary, completed-exclusion, and filter. The failures proved the tests because each failed on the exact semantic rule (`assert True is False`; a complement result set), not a syntax error; full suite returned to `41 passed` each time.
 
 ---
 
@@ -117,11 +110,7 @@ Return acceptance criteria, exact likely files/symbols, risks, proposed targeted
 
 ### F2-P1 — Repository-grounded feature plan
 
-**Prompt used:** See Prompt 09.
-
-```text
-[PASTE EXACT PROMPT SENT]
-```
+**Prompt used:** Prompt 09 (see `claude-prompts.md`).
 
 **AI response summary:** A 4-perspective design workflow (backend / test-matrix / frontend / adversarial), grounded in the repo, proposed query params `search` (case-insensitive substring over title AND description, trimmed, blank→omitted) and `assignee` (case-insensitive EXACT, both sides trimmed, None-safe); all filters compose with logical AND in `storage.get_all_tasks`; unchanged 422 enum validation; server-side only. Frontend: a compact filter bar via `URLSearchParams`, a sequence-id stale guard, debounce, and a Clear button.
 
@@ -174,38 +163,34 @@ Return acceptance criteria, exact likely files/symbols, risks, proposed targeted
 
 ### F2-P5 — Break Test and debugging evidence
 
-**Prompt used:** See Prompts 14A and 14B.
+**Prompt used:** Prompts 14A (propose) and 14B (execute).
 
-```text
-[PASTE EXACT PROMPT(S) SENT]
-```
+**AI response summary:** One Feature 2 Break Test (verification.md §7): removed ` or term in task.description.lower()` from the `get_all_tasks` search filter so search covered the title only. `test_search_matches_description_only` then failed as `AssertionError: assert set() == {'Standup'}` (a description-only term matched nothing); restored with `git checkout`, full suite back to `60 passed`, Git clean.
 
-**AI response summary:** `[COMPLETE]`
-
-**Human decision:** `[COMPLETE]`
+**Human decision:** Safe because it mutated only committed source in one file with the test unchanged; it proved the test because search stopped covering the description field — the exact F2-US1 rule the test pins — rather than failing for a syntax reason.
 
 ---
 
 ## Refactor prompt and decision
 
-**Prompt used:** See Prompts 16A and 16B.
+**Prompt used:** Prompts 16A (plan) and 16B (apply).
 
-**Selected area:** `[FILTER HELPER / QUERY BUILDER / RENDER FUNCTION / OTHER]`
+**Selected area:** Frontend query-builder — `frontend/index.html::buildTaskQuery()` (single function).
 
-**Behavior risks named before refactor:** `[COMPLETE]`
+**Behavior risks named before refactor:** trimming `<select>` values is a no-op for the clean enum strings; an empty select must still omit its parameter (no false `?status=` → 422); the produced request URLs must stay byte-identical; `overdue=false` must never be sent.
 
-**AI changes accepted/edited/rejected:** `[COMPLETE]`
+**AI changes accepted/edited/rejected:** Accepted the `setIf(name, value)` helper as proposed; rejected the higher-risk backend `get_all_tasks` filter-chain alternative to avoid touching query semantics.
 
-**Before/after contract result:** `[COMPLETE]`
+**Before/after contract result:** 16/16 PASS before and after (behavior-contract.md; verification.md §8–9); the after-refactor headless-Chrome check captured **10/10** byte-identical request URLs and the full suite stayed `60 passed`.
 
 ## Evidence-based debugging entry
 
-**Failure:** `[ONE REAL FAILURE]`
+**Failure:** During the Feature 1 headless-Chrome verification, three checks failed on the first run — e.g. "edit clears the due date → the card still shows the old date `Jul 25, 2026`".
 
-**Evidence supplied to AI:** `[STATUS, RESPONSE, TRACEBACK, CONSOLE, NETWORK, OR DIFF]`
+**Evidence supplied to AI:** the driver's captured DOM snapshot and the exact assertion detail (`api=null card="Jul 25, 2026"`), the seed data, and the app's `refreshBoard`/`formatDueDate`/`is_overdue` code paths.
 
-**AI diagnosis:** `[SUMMARY]`
+**AI diagnosis:** none was an application bug. (1) A test-harness race — the check read the board after a direct-API poll returned, before the board's own `refreshBoard()` repainted. (2) A seeded task that was legitimately overdue, so the expected count was wrong. (3) A JSON `null` sentinel that a regex matched in the assertion.
 
-**Decision:** `ACCEPTED / EDITED / REJECTED` — `[WHY]`
+**Decision:** `EDITED` — fixed the test harness (wait on the DOM repaint; use a future-dated seed; check rendered badge text), never the application source.
 
-**Result:** `[TARGETED + FULL VERIFICATION]`
+**Result:** After the harness fixes, Feature 1 browser verification was 53/53 with no app change; the full suite stayed `60 passed`.

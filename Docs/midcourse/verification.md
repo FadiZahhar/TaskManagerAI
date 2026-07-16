@@ -96,8 +96,8 @@ Result: 60 passed, 3 warnings in 0.19s   (25 baseline + 16 Feature 1 + 19 Featur
 ### Final full suite
 
 ```text
-Command: [COMMAND]
-Result: [REAL SUMMARY]
+Command: .venv/bin/python -m pytest -q
+Result: 60 passed, 3 warnings in ~0.2s   (25 baseline + 16 Feature 1 + 19 Feature 2)
 ```
 
 ## 3. Manual browser checks — Feature 1
@@ -311,4 +311,4 @@ A third Feature 1 Break Test on a different function/module than #1 and #2 (whic
 | Required docs complete with no brackets/TBD | NOT RUN |
 | README commands verified | NOT RUN |
 | Public remote branch pushed | NOT RUN |
-| Repository URL ready for submission | `[URL]` |
+| Repository URL ready for submission | `https://github.com/FadiZahhar/TaskManagerAI` |

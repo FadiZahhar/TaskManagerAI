@@ -78,4 +78,4 @@ Use this as a strict **Met / Not Met** gate. Do not submit until every required 
 - **Documentation:** `COMPLETE / INCOMPLETE`
 - **Repository hygiene:** `PASS / FAIL`
 - **Submission recommendation:** `READY / READY AFTER CORRECTIONS / NOT READY`
-- **Repository URL:** `[PUBLIC URL]`
+- **Repository URL:** `https://github.com/FadiZahhar/TaskManagerAI`

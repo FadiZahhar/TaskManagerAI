@@ -94,7 +94,49 @@ existing `status`/`priority` behavior). No match returns `200` with `[]`.
 
 ---
 
-## ADR-4 — Feature 2 (search + combined filters)
+## ADR-4 — Optional case-insensitive text search on the list endpoint
 
-**Status:** Deferred — not yet designed or implemented. To be completed under the
-Feature 2 prompts (09+). No decisions recorded here yet.
+**Status:** Accepted (Feature 2).
+
+**Context.** Users need to find tasks by text. `GET /tasks` already filters by
+status/priority/overdue as sequential AND comprehensions over the in-memory dict.
+
+**Decision.** Add an optional `search: Optional[str] = None` query parameter to
+`list_tasks` → `storage.get_all_tasks`. Case-insensitive **substring** match over
+**both** `title` and `description` (`term in title.lower() or term in
+description.lower()`); the term is `.strip()`-ed and a blank/whitespace-only value
+is treated as omitted. Matching uses Python `in` (no regex). No new field, model,
+or dependency.
+
+**Alternatives.** Regex search (rejected: ReDoS and a 500 on metacharacters like
+`[`); a separate `/search` endpoint (rejected: the brief says extend the existing
+list endpoint); tokenized/fuzzy search (rejected: out of scope).
+
+**Consequences.** Omitted/blank search preserves the unfiltered list; no match →
+`200` with `[]`; metacharacters match literally. `.lower()` is adequate for the
+brief's ASCII scope (`.casefold()` would be more Unicode-correct — noted, not
+required).
+
+## ADR-5 — Assignee filter, AND composition, and the frontend filter bar
+
+**Status:** Accepted (Feature 2).
+
+**Decision.** Add `assignee: Optional[str] = None` to the list endpoint —
+case-insensitive **exact** match with **both** the query and the stored value
+trimmed, None-safe (an unassigned task never matches a value); blank → omitted. All
+filters (status, priority, overdue, assignee, search) compose with **logical AND**
+as independent sequential comprehensions; each `None`/blank filter is skipped so
+omitted filters preserve current behavior. Filtering builds new lists and never
+mutates `_tasks`. Invalid validated enum values keep FastAPI's `422`.
+
+**Why exact (not substring) assignee.** It is the dedicated "filter to this person"
+dimension, distinct from the free-text `search` over title/description; substring
+assignee would add noise (e.g. `an` matching many names). Case-insensitive and
+trimmed for usability and robustness against un-normalized stored values.
+
+**Frontend.** A compact filter bar (search input; status/priority `<select>`s
+carrying the enum **values**, not display labels; assignee input; the existing
+overdue checkbox; a Clear button) builds the query with `URLSearchParams` (correct
+encoding), omits blank/empty params (an empty enum like `?status=` would be a 422),
+never sends `overdue=false`, guards against stale responses with a monotonic
+sequence id, and debounces the text inputs — no framework or debounce library.

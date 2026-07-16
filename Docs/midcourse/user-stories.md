@@ -137,11 +137,11 @@
 
 Before these stories are marked final, replace assumptions with facts from the actual repository:
 
-- [ ] Exact task-list route and method.
-- [ ] Exact create and update routes/methods.
-- [ ] Exact completed status value.
-- [ ] Exact status and priority enums.
-- [ ] Existing optional-field/null convention.
-- [ ] Actual frontend file/component locations.
-- [ ] Actual pytest fixtures and state-reset pattern.
-- [ ] Actual validation response expectations.
+- [x] Exact task-list route and method — `GET /tasks` (`app/main.py::list_tasks`).
+- [x] Exact create and update routes/methods — `POST /tasks`, `PATCH /tasks/{task_id}`.
+- [x] Exact completed status value — `TaskStatus.DONE` (`"Done"`).
+- [x] Exact status and priority enums — `ToDo/InProgress/Done`; `Low/Medium/High` (`app/models.py`).
+- [x] Existing optional-field/null convention — `Optional[...] = None`; `assignee` serializes as JSON `null` (the precedent `due_date` follows).
+- [x] Actual frontend file/component locations — single file `frontend/index.html` (modal, cards, board, filter bar, `buildTaskQuery`).
+- [x] Actual pytest fixtures and state-reset pattern — `client`/`created_task` fixtures + autouse `_reset_storage` (`tests/conftest.py`).
+- [x] Actual validation response expectations — FastAPI `422` for invalid enum/date/bool; `404` for missing task.
