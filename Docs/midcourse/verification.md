@@ -145,15 +145,26 @@ unreachable from the native date picker, so it is verified at the API/422 level.
 
 ## 4. Manual browser checks — Feature 2
 
+> **RUN on 2026-07-16** via headless Google Chrome 150 over CDP (real fetch + CORS
+> from the `:5500` origin) against live servers. The **Network domain captured every
+> `GET /tasks` query string** to prove server-side filtering, URL-encoding, enum
+> **values** (not labels), omitted-empty params, and that `overdue=false` is never
+> sent. Drivers: scratchpad `bverify_f2.js` + `bverify_f2_err.js` (not committed).
+> **22/22 checks PASS.**
+
 | Check | Exact action | Expected | Evidence | Status |
 |---|---|---|---|---|
-| Search title | Enter a unique title fragment. | Matching task displays. | `[EVIDENCE]` | NOT RUN |
-| Search description | Enter a description-only fragment. | Matching task displays. | `[EVIDENCE]` | NOT RUN |
-| Case-insensitive | Search with different case. | Same matching task displays. | `[EVIDENCE]` | NOT RUN |
-| Combined filters | Choose status + priority and optional assignee/overdue. | Only tasks satisfying every criterion display. | `[EVIDENCE]` | NOT RUN |
-| No matches | Enter a known non-match. | 200/empty result; columns and empty states remain. | `[EVIDENCE]` | NOT RUN |
-| Clear/reset | Click clear/reset. | Controls reset and unfiltered board reloads. | `[EVIDENCE]` | NOT RUN |
-| Request error | Stop backend or use observed failure safely. | Visible error; no false “no matches” state. | `[EVIDENCE]` | NOT RUN |
+| Search title | Type a title fragment (`report`). | Matching task(s) display; server round-trip. | Network `GET /tasks?search=report`; card `Write report` shown; all 3 columns visible. | PASS |
+| Search description | Type a description-only fragment. | Description match displays. | `search=report` also returns `Email vendor` (matched via its description). | PASS |
+| Case-insensitive | Search `REPORT`. | Same matches. | Same 2 cards returned for `REPORT`. | PASS |
+| Combined filters | Set several controls. | AND across all criteria. | `?search=report&status=ToDo` → only `Write report`; `priority=High` → `Write report`+`Deploy API`; `assignee=dana lee` (exact, CI) → same. | PASS |
+| No matches | Search `zzzznope`. | 200/empty; columns + placeholders remain; not an error. | 0 cards, all 3 columns show `No tasks` `(0)`, banner `ready`. | PASS |
+| Clear/reset | Click **Clear**. | Controls reset; one unfiltered refetch. | All controls empty/unchecked; a single `GET /tasks` (no params); 4 cards restored. | PASS |
+| Request error | Stop backend, trigger a filter reload. | Visible error; no false “no matches”. | Banner `error`: `Couldn't load tasks: Failed to fetch` (distinct from the ready+empty no-match state). | PASS |
+| Enum values not labels | Filter status `In Progress`. | Sends the API enum value. | Network `status=InProgress` (never `In+Progress`); `All statuses` (value="") omits the param entirely. | PASS |
+| Encoding / never overdue=false | Search `a & b`; toggle Overdue off. | Encoded query; unchecked omits param. | `search=a+%26+b` (200, matches literally); unchecking Overdue sends `GET /tasks` with no `overdue`. | PASS |
+| Stale-response / debounce | Type 6 chars rapidly. | Few requests; final state correct. | Debounce collapsed 6 keystrokes → **1** request; board = `report` results. | PASS |
+| Preserved flows | Create + drag with bar present. | Existing flows still work. | New task created; drag `ToDo→InProgress` persisted, filter bar unaffected. | PASS |
 
 ## 5. Behavior contract before refactor
 

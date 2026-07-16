@@ -465,6 +465,7 @@
     .board-controls {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 0.75rem;
       padding: 0.75rem 1.75rem 0;
     }
@@ -483,6 +484,32 @@
     .filter-toggle input {
       accent-color: var(--accent);
       cursor: pointer;
+    }
+
+    .filter-input {
+      font: inherit;
+      font-size: 0.85rem;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.4rem 0.6rem;
+    }
+
+    #filter-search {
+      flex: 1 1 12rem;
+      min-width: 8rem;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
+    }
+
+    .board-controls .btn-secondary {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
     }
 
     /* Modal */
@@ -655,11 +682,26 @@
     </form>
   </dialog>
 
-  <div class="board-controls">
+  <div class="board-controls" role="search">
+    <input type="search" id="filter-search" class="filter-input" placeholder="Search title or description…" aria-label="Search tasks" />
+    <select id="filter-status" class="filter-input" aria-label="Filter by status">
+      <option value="">All statuses</option>
+      <option value="ToDo">To Do</option>
+      <option value="InProgress">In Progress</option>
+      <option value="Done">Done</option>
+    </select>
+    <select id="filter-priority" class="filter-input" aria-label="Filter by priority">
+      <option value="">All priorities</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+    </select>
+    <input type="text" id="filter-assignee" class="filter-input" placeholder="Assignee" aria-label="Filter by assignee" />
     <label class="filter-toggle">
       <input type="checkbox" id="overdue-filter" />
       Overdue only
     </label>
+    <button type="button" id="filter-clear" class="btn-secondary">Clear</button>
   </div>
 
   <main class="board" aria-label="Task board">
@@ -724,6 +766,11 @@
 
     const banner = document.getElementById("board-banner");
     const overdueFilter = document.getElementById("overdue-filter");
+    const filterSearch = document.getElementById("filter-search");
+    const filterStatus = document.getElementById("filter-status");
+    const filterPriority = document.getElementById("filter-priority");
+    const filterAssignee = document.getElementById("filter-assignee");
+    const filterClear = document.getElementById("filter-clear");
 
     function setBannerState(state, message) {
       banner.dataset.state = state;
@@ -740,10 +787,17 @@
     }
 
     function buildTaskQuery() {
+      // URLSearchParams encodes values (spaces, &, %, unicode). Blank text and
+      // the "All …" (value="") select options are OMITTED, not sent: an empty
+      // enum like ?status= would be rejected by the backend as invalid.
       const params = new URLSearchParams();
-      if (overdueFilter.checked) {
-        params.set("overdue", "true");
-      }
+      const search = filterSearch.value.trim();
+      if (search) params.set("search", search);
+      if (filterStatus.value) params.set("status", filterStatus.value);
+      if (filterPriority.value) params.set("priority", filterPriority.value);
+      const assignee = filterAssignee.value.trim();
+      if (assignee) params.set("assignee", assignee);
+      if (overdueFilter.checked) params.set("overdue", "true"); // never send overdue=false
       const query = params.toString();
       return query ? `?${query}` : "";
     }
@@ -906,14 +960,23 @@
       renderBoard(tasks);
     }
 
+    // Monotonic id so a slow earlier response from rapid filter changes can't
+    // overwrite a newer one (stale-response guard). Simpler than AbortController
+    // and it never renders an aborted request as a fake error.
+    let loadSeq = 0;
     async function loadBoard() {
+      const seq = ++loadSeq;
       setBannerState("loading", "Loading tasks…");
+      let tasks;
       try {
-        await refreshBoard();
-        setBannerState("ready", "");
+        tasks = await fetchTasks();
       } catch (error) {
-        setBannerState("error", `Couldn't load tasks: ${error.message}`);
+        if (seq === loadSeq) setBannerState("error", `Couldn't load tasks: ${error.message}`);
+        return;
       }
+      if (seq !== loadSeq) return; // a newer load started; drop this stale result
+      renderBoard(tasks);
+      setBannerState("ready", "");
     }
 
     const inFlightUpdates = new Set();
@@ -1136,9 +1199,30 @@
       }
     });
 
-    // Re-fetch from the server whenever the overdue filter toggles: the board
-    // renders server truth, it does not filter client-side (backend-owned).
+    // All filtering is server-side (the board renders server truth; there is no
+    // client-side filtering). Selects/checkbox reload immediately; the free-text
+    // inputs are debounced so typing doesn't fire a request per keystroke — no
+    // library, just a shared timer.
+    let filterDebounce = null;
+    function scheduleFilterReload() {
+      clearTimeout(filterDebounce);
+      filterDebounce = setTimeout(loadBoard, 250);
+    }
+    filterSearch.addEventListener("input", scheduleFilterReload);
+    filterAssignee.addEventListener("input", scheduleFilterReload);
+    filterStatus.addEventListener("change", loadBoard);
+    filterPriority.addEventListener("change", loadBoard);
     overdueFilter.addEventListener("change", loadBoard);
+
+    filterClear.addEventListener("click", () => {
+      clearTimeout(filterDebounce); // drop any queued keystroke reload
+      filterSearch.value = "";
+      filterStatus.value = "";
+      filterPriority.value = "";
+      filterAssignee.value = "";
+      overdueFilter.checked = false;
+      loadBoard(); // set controls directly (no synthetic events) -> one unfiltered fetch
+    });
 
     attachColumnDropHandlers();
     loadBoard();
