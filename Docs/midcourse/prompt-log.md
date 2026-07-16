@@ -6,7 +6,7 @@
 
 | Tool | Purpose | Why selected |
 |---|---|---|
-| Claude Code | Repository inspection, planning, focused implementation, test drafting, diff review, and evidence-based debugging | `[COMPLETE]` |
+| Claude Code | Repository inspection, planning, focused implementation, test drafting, diff review, and evidence-based debugging | Single agent that inspects the real repo, runs pytest/`py_compile`/`node --check`, and makes focused edits under the phased workflow. |
 | `[OTHER TOOL, IF USED]` | `[PURPOSE]` | `[REASON]` |
 
 ## Weak prompt rewritten into a stronger prompt
@@ -46,70 +46,58 @@ Return acceptance criteria, exact likely files/symbols, risks, proposed targeted
 [PASTE EXACT PROMPT SENT]
 ```
 
-**AI response summary:** `[WHAT CLAUDE FOUND AND PROPOSED]`
+**AI response summary:** Read-only plan (Prompt 03). Proposed `due_date: Optional[date]` on the three models following the `assignee` nullable precedent; `overdue` as a derived Pydantic computed field (not stored) backed by one predicate `is_overdue(due_date, status, today)`; an `overdue` query filter on the existing `GET /tasks`; and the frontend modal/card/toggle touchpoints. Flagged the missing `mini-adr.md` and two decisions to ratify.
 
 **Human review:**
 
-- Accepted: `[ITEMS]`
-- Edited: `[ITEMS AND WHY]`
-- Rejected: `[ITEMS AND WHY]`
-- Corrected AI assumption: `[REQUIRED — AT LEAST ONE FOR THIS FEATURE]`
+- Accepted: the plan as written (models/storage/route boundary; derived overdue; filter on the existing endpoint).
+- Edited: none.
+- Rejected: none.
+- Corrected AI assumption: rejected the naive "required datetime + stored `overdue` boolean" in favour of an optional date-only field with overdue derived per response (ADR-2); "today" fixed to UTC for consistency with existing timestamps.
 
-**Evidence produced:** `[FILES, PLAN, COMMANDS, OR DIFF]`
+**Evidence produced:** Prompt 03 plan (facts vs assumptions, files/symbols, test matrix, phase order); `Docs/midcourse/mini-adr.md` (ADR-1..4).
 
 ### F1-P2 — Backend implementation
 
-**Prompt used:** See Prompt 04.
+**Prompt used:** See Prompt 04 (implemented together with Prompt 06 after the user chose "Backend first, then frontend").
 
-```text
-[PASTE EXACT PROMPT SENT]
-```
-
-**AI response summary:** `[COMPLETE]`
+**AI response summary:** Added `due_date` to `TaskCreate/Update/Response`, the `is_overdue` predicate, the `overdue` computed field, `due_date` persistence in `storage.add_task`, and the `overdue` filter in `storage.get_all_tasks` + `list_tasks`. `update_task` left unchanged (its `exclude_unset=True` already gives clear-via-null).
 
 **Human review:**
 
-- Accepted: `[COMPLETE]`
-- Edited: `[COMPLETE]`
-- Rejected: `[COMPLETE]`
+- Accepted: the full backend diff.
+- Edited: none.
+- Rejected: none.
 
-**Verification:** `[TARGETED COMMAND + RESULT]`
+**Verification:** `py_compile` OK; `.venv/bin/python -m pytest -q` → `25 passed`; ad-hoc TestClient smoke → 20/20 assertions PASS.
 
 ### F1-P3 — Focused pytest coverage
 
-**Prompt used:** See Prompt 05.
+**Prompt used:** See Prompt 05 (completed after Prompt 07, when the user asked to close the remaining gaps).
 
-```text
-[PASTE EXACT PROMPT SENT]
-```
-
-**AI response summary:** `[COMPLETE]`
+**AI response summary:** Added `tests/test_due_dates.py` — 16 focused tests using the shared `client`/`created_task` fixtures and autouse reset: valid/absent create, invalid-date 422 (×2), update + clear-via-null with unrelated fields intact, overdue semantics (past incomplete, due-today, Done past-due, InProgress past-due), overdue filter (true/false/empty/invalid-bool), unfiltered regression, and a clock-independent `is_overdue` unit test. Deterministic via UTC-relative dates (no frozen clock, no new dependency).
 
 **Human review:**
 
-- Accepted test cases: `[COMPLETE]`
-- Assertions strengthened or setup edited: `[COMPLETE]`
-- Rejected test or weak assertion: `[COMPLETE]`
+- Accepted test cases: all 16.
+- Assertions strengthened or setup edited: assert status **plus** meaningful body/state (ids, unchanged fields, `overdue` flag), never status alone.
+- Rejected test or weak assertion: none.
 
-**Verification:** `[TARGETED/FULL COMMANDS + RESULTS]`
+**Verification:** `pytest tests/test_due_dates.py` → `16 passed`; full suite `.venv/bin/python -m pytest -q` → `41 passed, 3 warnings`.
 
 ### F1-P4 — Frontend integration and browser contract
 
 **Prompt used:** See Prompt 06.
 
-```text
-[PASTE EXACT PROMPT SENT]
-```
-
-**AI response summary:** `[COMPLETE]`
+**AI response summary:** Added the modal due-date input, edit prefill, null-clear payload rule, timezone-safe `formatDueDate`, card date display + accessible overdue badge, and an "Overdue only" toggle wired through `buildTaskQuery()` (server-side filtering; no client-side filtering). Existing columns/sorting/drag/modal/banner preserved.
 
 **Human review:**
 
-- Accepted: `[COMPLETE]`
-- Edited: `[COMPLETE]`
-- Rejected: `[COMPLETE]`
+- Accepted: the frontend diff.
+- Edited: none.
+- Rejected: none.
 
-**Browser evidence:** `[PASS/FAIL/NOT RUN + LOCATION]`
+**Browser evidence:** NOT RUN — no browser control this session. Exact manual + DevTools steps in `verification.md` §3.
 
 ### F1-P5 — Break Test and debugging evidence
 

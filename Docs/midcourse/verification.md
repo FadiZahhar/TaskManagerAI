@@ -43,16 +43,36 @@ Done past-due → false; `?overdue=true/false` filters correctly; PATCH set/clea
 (`due_date:null`) works and leaves unrelated fields unchanged; response shape is
 additive (`due_date` + `overdue` on every task).
 
+### Feature 1 verification — Prompt 07 (per requested item)
+
+Evidence sources: `pytest` (regression), an ad-hoc FastAPI TestClient smoke script
+(scratchpad, not committed), and code-path review. No browser control this session.
+
+| Requested item | Status | Evidence |
+|---|---|---|
+| Full pytest suite (regression) | PASS | `.venv/bin/python -m pytest -q` → `41 passed, 3 warnings` (25 existing + 16 new) |
+| Targeted Feature 1 pytest | PASS | `pytest tests/test_due_dates.py` → `16 passed` (added after the initial Prompt 07 snapshot; see §2) |
+| Create with / without date | PASS (API) / NOT RUN (UI) | Smoke: with date → 201 + ISO `due_date`; without → 201 + `null`. Browser create NOT RUN. |
+| Edit and clear date | PASS (API) / NOT RUN (UI) | Smoke: PATCH sets date (200), PATCH `due_date:null` clears (200), `title` unchanged. Browser edit NOT RUN. |
+| Refresh persistence | PASS (API) / NOT RUN (UI) | Smoke: GET after PATCH reflects the change (module-level store). UI server-truth refresh NOT RUN. |
+| Invalid backend date behavior | PASS (API) | Smoke: `2026-13-40` and `not-a-date` → 422. (Native date picker blocks bad input; Network-forced 422 path NOT RUN.) |
+| Overdue indicator semantics | PASS (predicate) / NOT RUN (UI) | Smoke: past ToDo & InProgress → `overdue:true`; due-today → false; Done past-due → false. Visual badge NOT RUN. |
+| Overdue filter and clear | PASS (API) / NOT RUN (UI) | Smoke: `?overdue=true` returns only the two overdue; `?overdue=false` excludes them. UI toggle/clear NOT RUN. |
+| Preserved existing behavior | PASS (backend) / NOT RUN (UI) | `25 passed`; response keys additive (no shape assertions broken). Drag/edit/modal UI NOT RUN. |
+
+Maps to behavior-contract items: 1,2 PASS; 3 backend-PASS/UI-NOT RUN; 4,5,6,7,9
+backend-PASS/UI-NOT RUN; 8 NOT RUN (visual). **No FAIL found; no source change made this phase.**
+
 ## 2. New backend tests
 
-Use one row per new test. The assignment requires at least four new pytest tests; the recommended target is at least eight meaningful tests across the two features.
+Use one row per new test. The assignment requires at least four new pytest tests; the recommended target is at least eight meaningful tests across the two features. Feature 1 added **16** tests in `tests/test_due_dates.py` (rows below summarise the four required categories).
 
 | Feature | Test name | Behavior protected | Targeted command | Result |
 |---|---|---|---|---|
-| Due dates | `[TEST]` | Valid create due date | `[COMMAND]` | NOT RUN |
-| Due dates | `[TEST]` | Invalid due date rejected | `[COMMAND]` | NOT RUN |
-| Due dates | `[TEST]` | Update/clear due date | `[COMMAND]` | NOT RUN |
-| Due dates | `[TEST]` | Overdue predicate/filter | `[COMMAND]` | NOT RUN |
+| Due dates | `test_create_task_with_valid_due_date_returns_201_and_echoes_iso` | Valid create echoes ISO date; overdue=false | `pytest tests/test_due_dates.py` | PASS |
+| Due dates | `test_create_task_invalid_due_date_month_returns_422` / `_non_date_due_date_` | Invalid date rejected by backend (422) | `pytest tests/test_due_dates.py` | PASS |
+| Due dates | `test_update_clears_due_date_via_null_keeps_other_fields` / `_sets_due_date_` | Update + clear via null; unrelated fields intact | `pytest tests/test_due_dates.py` | PASS |
+| Due dates | `test_overdue_filter_returns_only_past_due_incomplete` (+ semantics/predicate tests) | Overdue filter + predicate (due-today & Done excluded) | `pytest tests/test_due_dates.py` | PASS |
 | Search/filters | `[TEST]` | Title/description search | `[COMMAND]` | NOT RUN |
 | Search/filters | `[TEST]` | Case-insensitive matching | `[COMMAND]` | NOT RUN |
 | Search/filters | `[TEST]` | Combined status + priority | `[COMMAND]` | NOT RUN |
@@ -61,8 +81,8 @@ Use one row per new test. The assignment requires at least four new pytest tests
 ### Full suite after Feature 1
 
 ```text
-Command: [COMMAND]
-Result: [REAL SUMMARY]
+Command: .venv/bin/python -m pytest -q
+Result: 41 passed, 3 warnings in 0.12s   (25 existing + 16 new Feature 1 tests in tests/test_due_dates.py)
 ```
 
 ### Full suite after Feature 2
@@ -125,16 +145,16 @@ Copy the completed statuses from `behavior-contract.md` and add evidence referen
 
 | Step | Evidence |
 |---|---|
-| Selected test | `[TEST NAME]` |
-| Why important | `[BEHAVIOR/BUG IT PROTECTS]` |
-| Clean checkpoint | `[HASH / GIT STATUS]` |
-| Correct-source command/result | `[COMMAND + PASS]` |
-| Approved temporary source mutation | `[EXACT SMALL CHANGE; DO NOT CHANGE TEST]` |
-| Mutated-source command/result | `[COMMAND + EXPECTED FAILURE EXCERPT]` |
-| Why failure is semantic | `[EXPLAIN]` |
-| Source restoration | `[HOW RESTORED]` |
-| Restored command/result | `[COMMAND + PASS]` |
-| Final Git proof | `[git diff/status RESULT]` |
+| Selected test | `tests/test_due_dates.py::test_due_today_is_not_overdue` |
+| Why important | Protects the strict boundary rule "a task due **today** is not overdue" (ADR-2 / F1-US3). A weaker predicate (`<=`) would wrongly flag today's tasks. |
+| Clean checkpoint | `app/models.py` at commit `b40f664`; `git diff -- app/models.py` empty before mutation. |
+| Correct-source command/result | `pytest tests/test_due_dates.py::test_due_today_is_not_overdue` → `1 passed`. |
+| Approved temporary source mutation | `app/models.py`, `is_overdue`: `return due_date < today` → `return due_date <= today`. Test file unchanged. |
+| Mutated-source command/result | Same command → `1 failed`: `assert True is False` at `tests/test_due_dates.py:86`. |
+| Why failure is semantic | Under `<=`, a task with `due_date == today` computes `overdue=True`; the test requires `False`. It fails on the exact due-today boundary the rule defines — not a syntax error — proving the test enforces strict `<`. |
+| Source restoration | `git checkout -- app/models.py` (restores `<`). |
+| Restored command/result | Same command → `1 passed`; full suite `.venv/bin/python -m pytest -q` → `41 passed, 3 warnings`. |
+| Final Git proof | `git diff -- app/models.py` empty; `git status` shows `app/` clean (only the intended Feature 1 test + docs remain, committed in this checkpoint). |
 
 ## 7. Break Test evidence — required test 2 (Feature 2)
 
