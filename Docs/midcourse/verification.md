@@ -103,24 +103,45 @@ Result: [REAL SUMMARY]
 ## 3. Manual browser checks — Feature 1
 
 > **RUN on 2026-07-16** via headless Google Chrome 150.0.7871.124 driven over the
-> Chrome DevTools Protocol — real JS execution + real `fetch` to the backend + real
-> CORS from the `http://127.0.0.1:5500` origin — against the running servers
-> (backend `:8000`, frontend `:5500`). Driver: scratchpad `bverify.js` (not
-> committed); it seeded a known dataset through the API, exercised the live board,
-> and restored the store to empty afterwards. **16/16 UI assertions passed.**
-> Invalid-date input is unreachable from the native date picker and is covered by
-> the backend 422 tests instead (§2).
+> Chrome DevTools Protocol — real JS + real `fetch` + real CORS from the
+> `http://127.0.0.1:5500` origin, against live servers (backend `:8000`, frontend
+> `:5500`). Chrome launched in `TZ=America/Los_Angeles` (UTC-8) to stress date
+> formatting; the Network domain captured request URLs, PATCH bodies, and real
+> HTTP status codes; drag-and-drop driven via synthetic `DataTransfer`/`DragEvent`.
+>
+> The check matrix was **designed by a 6-dimension agent fan-out**, executed by
+> driver `bverify2.js` (scratchpad, not committed), then **adversarially audited**
+> by a 4-lens agent workflow (false-positives / coverage-gaps / harness-artifacts /
+> semantics). The audit's actionable findings were fixed in the harness (independent
+> aria expected; real HTTP-status assertions; red-dominant style; null-date filter
+> case; edit/delete under active filter; title-only-edit preserves date; server-side
+> AND). Final run: **53/53 checks PASS** (store reset to empty afterwards).
 
-| Check | Exact action | Expected | Evidence | Status |
-|---|---|---|---|---|
-| Create with date | Create task, future due date, submit via modal. | POST succeeds; date shows and persists after refresh. | Card shows `Jul 17, 2026`; API `due_date=2026-07-17`. | PASS |
-| Create without date | Submit with empty date field. | Created with no misleading date. | Card has no `.due-date` badge; `due_date=null`. | PASS |
-| Edit date | Open edit, change date, save. | Prefilled with existing date; new date persists. | Prefill `2026-07-17`; after save API `due_date=2026-07-18`. | PASS |
-| Clear date | Open edit, clear date, save. | Date cleared after refresh. | API `due_date=null`; card badge gone. | PASS |
-| Overdue indicator | View a past-due ToDo task. | Overdue marker visible + accessible. | Red badge; `aria-label="Due Jul 15, 2026, overdue"`. | PASS |
-| Due today | View a task due today. | Not marked overdue. | `BV Due today` (Jul 16) shows date, `overdue=false`. | PASS |
-| Completed past due | View a Done task with a past date. | Not marked overdue. | `BV Done late` in Done column, `overdue=false`. | PASS |
-| Overdue filter | Toggle "Overdue only", then clear. | Only overdue shown; all columns remain; clear restores. | ON → 1 card + ToDo/InProgress/Done all visible, empties show "No tasks"; OFF → 5 restored. | PASS |
+**Comprehensive run — 53/53 PASS by group:**
+
+| Group | Pass | What it proves |
+|---|---|---|
+| S1 render / semantics / a11y | 16/16 | overdue badge (class+title+aria) on past ToDo & InProgress; due-today/future/Done-past-due/no-date NOT overdue; strict-`<` boundary; exactly 2 overdue; priority+assignee preserved; **aria-label = independently-computed date**; human-readable format, no leading zero; UTC-8 renders ISO day (no off-by-one); red-dominant styling; `<input>` has `<label for>` |
+| S2 overdue filter | 13/13 | server round-trip `GET ?overdue=true`; only overdue shown; due-today/Done/future/**null-date** excluded; all 3 columns + placeholders + counts; priority sort kept; survives create & drag; clear sends `GET /tasks` (no `overdue=false`); empty result = ready banner |
+| S2b edit/delete under filter | 4/4 | editing a displayed overdue task to a future date removes it (filter stays ON); non-date edit keeps it; delete keeps filter ON (`DELETE 204`) — **F1-US4 "edit/drag remain functional for displayed tasks"** |
+| S3 regression (Modules 1–3) | 9/9 | valid drag `PATCH 200` + counts; invalid drag → error banner, card stays; same-column noop (no PATCH); blank-title blocks submit (no POST); edit-only-title PATCH body has NO `status` key (`200`); invalid-transition modal error stays open; delete confirm (`204`) / cancel |
+| S4 crud dates | 7/7 | create with/without date; edit prefill (ISO), change, clear; edit-only-date preserves other fields; edit-only-title preserves existing date |
+| S5 error / network | 4/4 | invalid due_date `422`; edit missing task `404`; server-side AND `?status=ToDo&overdue=true`; backend down → error banner, no false success |
+
+Core human-readable flows (subset, for quick reference):
+
+| Check | Evidence | Status |
+|---|---|---|
+| Create with / without date | card shows `Jul 18, 2026` / no badge; API `due_date` matches | PASS |
+| Edit change / clear date | prefill `2026-07-18` → `2026-07-25`; clear → `null`, badge gone | PASS |
+| Overdue indicator (accessible) | red badge, `aria-label="Due Jul 15, 2026, overdue"` | PASS |
+| Due-today / Done past-due not overdue | date shown, `overdue=false` | PASS |
+| Overdue filter + clear | ON → only overdue, all columns visible, empties "No tasks"; OFF → restored | PASS |
+
+Scope note: this browser run covers the UI-observable Feature 1 criteria. Contract
+items 1 (Module 1–3 pytest), 2 (unfiltered `GET /tasks` shape) and 16 (Break Tests)
+are established separately by §1/§2 (`41 passed`) and §6. Invalid-date input is
+unreachable from the native date picker, so it is verified at the API/422 level.
 
 ## 4. Manual browser checks — Feature 2
 
