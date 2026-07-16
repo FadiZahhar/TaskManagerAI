@@ -4,8 +4,8 @@ Use this as a strict **Met / Not Met** gate. Do not submit until every required 
 
 ## Repository and branch
 
-- [ ] Repository is public. — **VERIFY EXTERNALLY:** `https://github.com/FadiZahhar/TaskManagerAI` returns **404 to anonymous access**; the owner must set the GitHub repository to **public** before submission.
-- [ ] Submitted URL opens without authentication. — pending the public-visibility fix above.
+- [x] Repository is public. — verified `gh repo view FadiZahhar/TaskManagerAI` → `"visibility":"PUBLIC"`.
+- [x] Submitted URL opens without authentication. — `https://github.com/FadiZahhar/TaskManagerAI` is public.
 - [x] Branch is named exactly `mid-course-project`.
 - [x] Branch contains the final code and documentation.
 - [x] No secrets, tokens, credentials, private data, `.env` files, or unrelated generated artifacts are committed.
@@ -77,5 +77,5 @@ Use this as a strict **Met / Not Met** gate. Do not submit until every required 
 - **Manual browser checks:** `PASS` — Feature 1 53/53, Feature 2 22/22 (headless Chrome via CDP); baseline live-smoke `NOT RUN` (historical, superseded by §3/§4)
 - **Documentation:** `COMPLETE` — 0 bracket placeholders in the six required files; reflection 409 words
 - **Repository hygiene:** `PASS` — `.DS_Store` untracked + gitignored; no secrets/debug output/wildcard CORS; Break Test mutations restored
-- **Submission recommendation:** `READY AFTER CORRECTIONS` — (1) set the GitHub repository to **public** (URL currently 404 to anonymous); (2) create the final reviewed commit + push the last audit changes (README merge, `.DS_Store` removal, §10 hygiene) per Prompt 19.
+- **Submission recommendation:** `READY` — repository is public (`gh` → PUBLIC); the final reviewed commit (`6f6feb8` — README merge, `.DS_Store` removal, audit docs) is pushed to `origin/mid-course-project`.
 - **Repository URL:** `https://github.com/FadiZahhar/TaskManagerAI`

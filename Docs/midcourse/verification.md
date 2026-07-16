@@ -310,5 +310,5 @@ A third Feature 1 Break Test on a different function/module than #1 and #2 (whic
 | No unrelated generated files | PASS — two tracked `.DS_Store` untracked (`git rm --cached`) + added to `.gitignore`; no `__pycache__`/`.pyc`/`.venv` tracked |
 | Required docs complete with no brackets/TBD | PASS — 0 bracket placeholders in the six required files |
 | README commands verified | PASS — `pytest` → `60 passed`; install/backend/frontend commands documented and match the working setup |
-| Public remote branch pushed | NOT RUN — push is Prompt 19 (explicit authorization required); not yet pushed |
+| Public remote branch pushed | PASS — `origin/mid-course-project` at `6f6feb8`; repo `gh` visibility PUBLIC |
 | Repository URL ready for submission | `https://github.com/FadiZahhar/TaskManagerAI` |
