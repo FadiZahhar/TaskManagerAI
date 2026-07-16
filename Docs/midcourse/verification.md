@@ -247,16 +247,16 @@ A third Feature 1 Break Test on a different function/module than #1 and #2 (whic
 
 | Step | Evidence |
 |---|---|
-| Selected test | `[TEST NAME]` |
-| Why important | `[BEHAVIOR/BUG IT PROTECTS]` |
-| Clean checkpoint | `[HASH / GIT STATUS]` |
-| Correct-source command/result | `[COMMAND + PASS]` |
-| Approved temporary source mutation | `[EXACT SMALL CHANGE; DO NOT CHANGE TEST]` |
-| Mutated-source command/result | `[COMMAND + EXPECTED FAILURE EXCERPT]` |
-| Why failure is semantic | `[EXPLAIN]` |
-| Source restoration | `[HOW RESTORED]` |
-| Restored command/result | `[COMMAND + PASS]` |
-| Final Git proof | `[git diff/status RESULT]` |
+| Selected test | `tests/test_search_filters.py::test_search_matches_description_only` |
+| Why important | Protects F2-US1's core rule that text search covers the **description** field, not only the title. Dropping the description clause would make description-only matches silently disappear. |
+| Clean checkpoint | `HEAD 35bd28c`, tree clean; `git diff -- app/storage.py` empty before mutation. |
+| Correct-source command/result | `pytest tests/test_search_filters.py::test_search_matches_description_only` → `1 passed`. |
+| Approved temporary source mutation | `app/storage.py`, `get_all_tasks` search block: removed ` or term in task.description.lower()` so search became `term in task.title.lower()` only. Test file unchanged. |
+| Mutated-source command/result | Same command → `1 failed`: `AssertionError: assert set() == {'Standup'}` at `tests/test_search_filters.py:40`. |
+| Why failure is semantic | With title-only search, the term `roadmap` (present only in a description) matches nothing → `[]`; the test requires `{Standup}`. It fails on the exact "search covers description" rule — not a syntax error. (Collateral: `test_search_matches_title_or_description` also fails, confirming the rule is well-covered.) |
+| Source restoration | `git checkout -- app/storage.py` (restores the `or … description` clause). |
+| Restored command/result | Same command → `1 passed`; full suite `.venv/bin/python -m pytest -q` → `60 passed, 3 warnings`. |
+| Final Git proof | `git diff` empty and `git status --short` empty after restore — no temporary mutation remains. |
 
 ## 8. Focused refactor and behavior preservation
 
