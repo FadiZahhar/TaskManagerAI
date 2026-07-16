@@ -188,11 +188,32 @@ byte-identical to HEAD, so the evidence stands). All PASS; no FAIL; no code chan
 
 ## 5. Behavior contract before refactor
 
-Copy the completed statuses from `behavior-contract.md` and add evidence references.
+Audited at `HEAD c944d30`, tree clean; full suite re-run this pass → `60 passed, 3
+warnings`. `app/` + `frontend/` are byte-identical to the browser-verified builds
+(F1 §3 = 53/53, F2 §4 = 22/22), so the browser evidence stands.
 
-- Result: `[__ / 16 PASS]`
-- Failures corrected before checkpoint: `[COMPLETE]`
-- Commit/checkpoint: `[HASH AND MESSAGE]`
+| # | Contract item | Status | Evidence |
+|---|---|---|---|
+| 1 | Module 1–3 pytest suite still passes | PASS | `pytest -q` → `60 passed` (includes all M1–3 tests) |
+| 2 | Unfiltered `GET /tasks` compatible | PASS | `test_unfiltered_list_remains_compatible`; §4 clear → single `GET /tasks`, 4 cards |
+| 3 | Existing create/edit/drag/status usable | PASS | §3 regression 9/9 (valid/invalid drag, edit, delete); §4 create+drag with bar |
+| 4 | Create with due date persists after refresh | PASS | `test_create_task_with_valid_due_date…`; §3 card `Jul 17` + API echo |
+| 5 | Due date updated/cleared, unrelated fields intact | PASS | `test_update_sets_/_clears_due_date…`; §3 prefill→change→clear |
+| 6 | Invalid due-date rejected by backend | PASS | `test_create_task_invalid_due_date_month/_non_date…` → 422 |
+| 7 | Overdue semantics match ADR | PASS | `test_is_overdue_predicate_rules` + due-today/Done/InProgress tests; §3 |
+| 8 | Board displays due dates + truthful overdue indicator | PASS | §3 red badge w/ `aria-label`, due-today/Done not flagged |
+| 9 | Overdue filter returns only overdue + valid empty list | PASS | `test_overdue_filter…`; §3 filter ON → only overdue, empty→ready |
+| 10 | Search matches title + description, case-insensitive | PASS | `test_search_matches_title/_description_only/_is_case_insensitive`; §4 |
+| 11 | Combined filters AND; omitted preserve behavior | PASS | `test_status_and_priority_/_search_and_status_/_search_and_overdue…`; §4 |
+| 12 | Invalid filter values return validation response | PASS | `test_invalid_status/priority_filter_returns_422`, `_with_valid_search…` |
+| 13 | No-match → 200 `[]`; UI valid empty state (not error) | PASS | `test_search_no_match…`; §4 0 cards, `No tasks (0)`, banner ready |
+| 14 | Filter controls keep all columns visible; reset restores | PASS | §4 all 3 columns while filtered; Clear → unfiltered board |
+| 15 | HTTP/network failures visible; no false UI success | PASS | §3 + §4 backend-down → error banner (`Failed to fetch`), distinct from empty |
+| 16 | ≥2 Break Tests: pass → source-failure → restored pass, clean git | PASS | §6 (F1 ×3) + §7 (F2 ×1), each with clean `git diff`/`status` |
+
+- Result: **16 / 16 PASS**, 0 FAIL, 0 NOT RUN
+- Failures corrected before checkpoint: none (no FAIL found)
+- Commit/checkpoint: pre-refactor working checkpoint recommended (see Prompt 15 handoff); not yet committed
 
 ## 6. Break Test evidence — required test 1 (Feature 1)
 
