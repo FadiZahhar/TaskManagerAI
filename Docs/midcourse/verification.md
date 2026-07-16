@@ -66,7 +66,7 @@ indicator confirmed in §3). **No FAIL found; no source change made this phase.*
 
 ## 2. New backend tests
 
-Use one row per new test. The assignment requires at least four new pytest tests; the recommended target is at least eight meaningful tests across the two features. Feature 1 added **16** tests in `tests/test_due_dates.py` (rows below summarise the four required categories).
+Use one row per new test. The assignment requires at least four new pytest tests; the recommended target is at least eight meaningful tests across the two features. Feature 1 added **16** tests in `tests/test_due_dates.py` and Feature 2 added **19** in `tests/test_search_filters.py` (rows below summarise the required categories per feature).
 
 | Feature | Test name | Behavior protected | Targeted command | Result |
 |---|---|---|---|---|
@@ -74,10 +74,10 @@ Use one row per new test. The assignment requires at least four new pytest tests
 | Due dates | `test_create_task_invalid_due_date_month_returns_422` / `_non_date_due_date_` | Invalid date rejected by backend (422) | `pytest tests/test_due_dates.py` | PASS |
 | Due dates | `test_update_clears_due_date_via_null_keeps_other_fields` / `_sets_due_date_` | Update + clear via null; unrelated fields intact | `pytest tests/test_due_dates.py` | PASS |
 | Due dates | `test_overdue_filter_returns_only_past_due_incomplete` (+ semantics/predicate tests) | Overdue filter + predicate (due-today & Done excluded) | `pytest tests/test_due_dates.py` | PASS |
-| Search/filters | `[TEST]` | Title/description search | `[COMMAND]` | NOT RUN |
-| Search/filters | `[TEST]` | Case-insensitive matching | `[COMMAND]` | NOT RUN |
-| Search/filters | `[TEST]` | Combined status + priority | `[COMMAND]` | NOT RUN |
-| Search/filters | `[TEST]` | No matches or invalid filter | `[COMMAND]` | NOT RUN |
+| Search/filters | `test_search_matches_title` / `test_search_matches_description_only` / `test_search_matches_title_or_description` | Substring search over title AND description | `pytest tests/test_search_filters.py` | PASS |
+| Search/filters | `test_search_is_case_insensitive` / `test_search_trims_surrounding_whitespace` / `test_blank_search_behaves_as_no_search` | Case-insensitive; trims; blank/empty → no search | `pytest tests/test_search_filters.py` | PASS |
+| Search/filters | `test_status_and_priority_use_and` / `test_search_and_status_use_and` / `test_search_and_overdue_use_and` / `test_assignee_filter_exact_case_insensitive` | Combined filters compose with logical AND | `pytest tests/test_search_filters.py` | PASS |
+| Search/filters | `test_search_no_match_returns_200_and_empty_list` / `test_invalid_status_filter_returns_422` / `test_invalid_enum_with_valid_search_still_returns_422` / `test_filtering_does_not_mutate_stored_tasks` | No-match 200 `[]`; invalid enum 422 (incl. combined); no mutation | `pytest tests/test_search_filters.py` | PASS |
 
 ### Full suite after Feature 1
 
@@ -89,8 +89,8 @@ Result: 41 passed, 3 warnings in 0.12s   (25 existing + 16 new Feature 1 tests i
 ### Full suite after Feature 2
 
 ```text
-Command: [COMMAND]
-Result: [REAL SUMMARY]
+Command: .venv/bin/python -m pytest -q
+Result: 60 passed, 3 warnings in 0.19s   (25 baseline + 16 Feature 1 + 19 Feature 2)
 ```
 
 ### Final full suite
