@@ -45,23 +45,24 @@ additive (`due_date` + `overdue` on every task).
 
 ### Feature 1 verification — Prompt 07 (per requested item)
 
-Evidence sources: `pytest` (regression), an ad-hoc FastAPI TestClient smoke script
-(scratchpad, not committed), and code-path review. No browser control this session.
+Evidence sources: `pytest` (regression + 16 targeted), an ad-hoc FastAPI TestClient
+smoke script, and — added when the user asked to close the gaps — a headless Chrome
+(CDP) browser pass (§3). All rows now observed.
 
 | Requested item | Status | Evidence |
 |---|---|---|
 | Full pytest suite (regression) | PASS | `.venv/bin/python -m pytest -q` → `41 passed, 3 warnings` (25 existing + 16 new) |
-| Targeted Feature 1 pytest | PASS | `pytest tests/test_due_dates.py` → `16 passed` (added after the initial Prompt 07 snapshot; see §2) |
-| Create with / without date | PASS (API) / NOT RUN (UI) | Smoke: with date → 201 + ISO `due_date`; without → 201 + `null`. Browser create NOT RUN. |
-| Edit and clear date | PASS (API) / NOT RUN (UI) | Smoke: PATCH sets date (200), PATCH `due_date:null` clears (200), `title` unchanged. Browser edit NOT RUN. |
-| Refresh persistence | PASS (API) / NOT RUN (UI) | Smoke: GET after PATCH reflects the change (module-level store). UI server-truth refresh NOT RUN. |
-| Invalid backend date behavior | PASS (API) | Smoke: `2026-13-40` and `not-a-date` → 422. (Native date picker blocks bad input; Network-forced 422 path NOT RUN.) |
-| Overdue indicator semantics | PASS (predicate) / NOT RUN (UI) | Smoke: past ToDo & InProgress → `overdue:true`; due-today → false; Done past-due → false. Visual badge NOT RUN. |
-| Overdue filter and clear | PASS (API) / NOT RUN (UI) | Smoke: `?overdue=true` returns only the two overdue; `?overdue=false` excludes them. UI toggle/clear NOT RUN. |
-| Preserved existing behavior | PASS (backend) / NOT RUN (UI) | `25 passed`; response keys additive (no shape assertions broken). Drag/edit/modal UI NOT RUN. |
+| Targeted Feature 1 pytest | PASS | `pytest tests/test_due_dates.py` → `16 passed` (see §2) |
+| Create with / without date | PASS (API + UI) | Smoke: 201 + ISO / `null`. Browser (§3): card shows `Jul 17, 2026` / no badge. |
+| Edit and clear date | PASS (API + UI) | Smoke: PATCH set + clear via null. Browser (§3): prefill `2026-07-17` → `2026-07-18`; clear → `null`, badge gone. |
+| Refresh persistence | PASS (API + UI) | Smoke: GET after PATCH. Browser (§3): board re-renders server truth after each save. |
+| Invalid backend date behavior | PASS (API) | Smoke + tests: `2026-13-40`, `not-a-date` → 422. (Native picker blocks bad input in-browser.) |
+| Overdue indicator semantics | PASS (API + UI) | Smoke predicate. Browser (§3): past → red badge w/ aria-label; due-today → false; Done past-due → false. |
+| Overdue filter and clear | PASS (API + UI) | Smoke `?overdue=`. Browser (§3): ON → only overdue, all columns visible; OFF → restored. |
+| Preserved existing behavior | PASS (backend + UI) | `41 passed`; browser: all 3 columns, counts, empty placeholders, modal, banner intact. |
 
-Maps to behavior-contract items: 1,2 PASS; 3 backend-PASS/UI-NOT RUN; 4,5,6,7,9
-backend-PASS/UI-NOT RUN; 8 NOT RUN (visual). **No FAIL found; no source change made this phase.**
+Maps to behavior-contract items 1–9: all **PASS** (item 8 visual due-date + overdue
+indicator confirmed in §3). **No FAIL found; no source change made this phase.**
 
 ## 2. New backend tests
 
@@ -101,25 +102,25 @@ Result: [REAL SUMMARY]
 
 ## 3. Manual browser checks — Feature 1
 
-> Browser control was **unavailable** in the implementation session, so every row
-> below is **NOT RUN**. To run them: start the backend
-> (`uvicorn app.main:app --reload`) and frontend
-> (`python3 -m http.server 5500 --directory frontend`), open
-> <http://127.0.0.1:5500>, and open DevTools → Network. The invalid-date case is
-> not reachable from the native date picker; force it via the Network panel (re-send
-> a create/edit with `"due_date":"2026-13-40"`) and confirm a 422 with the modal
-> error shown and no false success.
+> **RUN on 2026-07-16** via headless Google Chrome 150.0.7871.124 driven over the
+> Chrome DevTools Protocol — real JS execution + real `fetch` to the backend + real
+> CORS from the `http://127.0.0.1:5500` origin — against the running servers
+> (backend `:8000`, frontend `:5500`). Driver: scratchpad `bverify.js` (not
+> committed); it seeded a known dataset through the API, exercised the live board,
+> and restored the store to empty afterwards. **16/16 UI assertions passed.**
+> Invalid-date input is unreachable from the native date picker and is covered by
+> the backend 422 tests instead (§2).
 
 | Check | Exact action | Expected | Evidence | Status |
 |---|---|---|---|---|
-| Create with date | Create a task with a future date. | POST succeeds; date appears and persists after refresh. | `[NETWORK/SCREENSHOT/NOTE]` | NOT RUN |
-| Create without date | Create with empty date field. | Task is created without a misleading date. | `[EVIDENCE]` | NOT RUN |
-| Edit date | Change the date, save, refresh. | New date persists; unrelated fields stay unchanged. | `[EVIDENCE]` | NOT RUN |
-| Clear date | Remove date in edit mode. | Date remains cleared after refresh. | `[EVIDENCE]` | NOT RUN |
-| Overdue indicator | View a past-due incomplete task. | Overdue marker is visible. | `[EVIDENCE]` | NOT RUN |
-| Due today | View a task due today. | It is not marked overdue. | `[EVIDENCE]` | NOT RUN |
-| Completed past due | View a completed task with a past date. | It is not marked overdue. | `[EVIDENCE]` | NOT RUN |
-| Overdue filter | Activate then clear filter. | Only overdue tasks display; columns remain; clear restores. | `[EVIDENCE]` | NOT RUN |
+| Create with date | Create task, future due date, submit via modal. | POST succeeds; date shows and persists after refresh. | Card shows `Jul 17, 2026`; API `due_date=2026-07-17`. | PASS |
+| Create without date | Submit with empty date field. | Created with no misleading date. | Card has no `.due-date` badge; `due_date=null`. | PASS |
+| Edit date | Open edit, change date, save. | Prefilled with existing date; new date persists. | Prefill `2026-07-17`; after save API `due_date=2026-07-18`. | PASS |
+| Clear date | Open edit, clear date, save. | Date cleared after refresh. | API `due_date=null`; card badge gone. | PASS |
+| Overdue indicator | View a past-due ToDo task. | Overdue marker visible + accessible. | Red badge; `aria-label="Due Jul 15, 2026, overdue"`. | PASS |
+| Due today | View a task due today. | Not marked overdue. | `BV Due today` (Jul 16) shows date, `overdue=false`. | PASS |
+| Completed past due | View a Done task with a past date. | Not marked overdue. | `BV Done late` in Done column, `overdue=false`. | PASS |
+| Overdue filter | Toggle "Overdue only", then clear. | Only overdue shown; all columns remain; clear restores. | ON → 1 card + ToDo/InProgress/Done all visible, empties show "No tasks"; OFF → 5 restored. | PASS |
 
 ## 4. Manual browser checks — Feature 2
 

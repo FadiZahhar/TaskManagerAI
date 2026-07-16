@@ -97,7 +97,7 @@ Return acceptance criteria, exact likely files/symbols, risks, proposed targeted
 - Edited: none.
 - Rejected: none.
 
-**Browser evidence:** NOT RUN — no browser control this session. Exact manual + DevTools steps in `verification.md` §3.
+**Browser evidence:** PASS — 16/16 UI checks via headless Google Chrome 150 driven over the Chrome DevTools Protocol (real fetch + CORS from the `:5500` origin) against the running servers. Covers create/edit/clear, due-date display, overdue badge (with `aria-label`), due-today/Done-past-due semantics, and the overdue filter/clear. Recorded in `verification.md` §3.
 
 ### F1-P5 — Break Test and debugging evidence
 
