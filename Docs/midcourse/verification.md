@@ -195,6 +195,23 @@ A second, distinct Feature 1 Break Test targeting a different semantic than #1 (
 | Restored command/result | Same command → `1 passed`; full suite `.venv/bin/python -m pytest -q` → `41 passed, 3 warnings`. |
 | Final Git proof | `git diff` empty and `git status --short` empty after restore — no temporary mutation remains. |
 
+### Break Test #3 (Feature 1) — overdue filter logic
+
+A third Feature 1 Break Test on a different function/module than #1 and #2 (which both mutate the `is_overdue` predicate in `models.py`). This one breaks the filter application in `storage.get_all_tasks` (the `?overdue=true` path, F1-US4).
+
+| Step | Evidence |
+|---|---|
+| Selected test | `tests/test_due_dates.py::test_overdue_filter_returns_only_past_due_incomplete` |
+| Why important | Protects that `GET /tasks?overdue=true` returns exactly the overdue tasks (server-side filtering), the crux of F1-US4. |
+| Clean checkpoint | `HEAD 38f2466`, tree clean; `git diff -- app/storage.py` empty before mutation. |
+| Correct-source command/result | `pytest tests/test_due_dates.py::test_overdue_filter_returns_only_past_due_incomplete` → `1 passed`. |
+| Approved temporary source mutation | `app/storage.py`, `get_all_tasks`: changed `task.overdue == overdue` to `task.overdue != overdue` (invert the filter match). Test file unchanged. |
+| Mutated-source command/result | Same command → `1 failed`: `AssertionError` at `tests/test_due_dates.py:115` — `?overdue=true` returned the 3 non-overdue tasks (`Left contains 2 more items`) instead of `[late]`. Status `200` still passed. |
+| Why failure is semantic | Inverting the match makes the filter return the **complement** of the overdue set; the test asserts it returns exactly the overdue task. It fails on the precise filtering behavior, not a syntax error. (Collateral: `test_overdue_filter_false_excludes_overdue`, `test_overdue_filter_no_matches_returns_200_and_empty_list` also fail — filter path well-covered.) |
+| Source restoration | `git checkout -- app/storage.py` (restores `== overdue`). |
+| Restored command/result | Same command → `1 passed`; full suite `.venv/bin/python -m pytest -q` → `41 passed, 3 warnings`. |
+| Final Git proof | `git diff` empty and `git status --short` empty after restore — no temporary mutation remains. |
+
 ## 7. Break Test evidence — required test 2 (Feature 2)
 
 | Step | Evidence |
