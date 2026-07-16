@@ -5,6 +5,36 @@ built incrementally across three modules: a running skeleton (Module 1),
 full task CRUD with status-transition rules (Module 2), and a drag-and-drop
 Kanban board with create/edit/delete (Module 3).
 
+## Mid-Course Project: Task Tracker Enhancements
+
+The `mid-course-project` branch adds two scoped, end-to-end features on top of
+Modules 1–3:
+
+1. **Due dates + overdue filtering** — an optional date-only `due_date`, a derived
+   (never stored) `overdue` flag, and an overdue filter on `GET /tasks` and the board.
+2. **Search + combined filters** — case-insensitive substring search over title and
+   description, combined with status / priority / assignee / overdue filters (logical
+   AND), plus a compact filter bar above the board.
+
+Setup, backend, frontend, and test commands are unchanged — see [Setup](#setup),
+[Run](#run), and [Test](#test) below. In short:
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+uvicorn app.main:app --reload                                  # backend  → http://127.0.0.1:8000
+python3 -m http.server 5500 --directory frontend               # frontend → http://127.0.0.1:5500
+pytest                                                         # full suite (60 tests)
+pytest tests/test_due_dates.py tests/test_search_filters.py    # the new feature tests
+```
+
+The human-owned, AI-assisted workflow evidence lives in `docs/midcourse/`:
+
+- User stories & acceptance criteria — `docs/midcourse/user-stories.md`
+- Decision record (ADRs) — `docs/midcourse/mini-adr.md`
+- AI prompt & decision log — `docs/midcourse/prompt-log.md`
+- Verification & Break Test evidence — `docs/midcourse/verification.md`
+- Reflection — `docs/midcourse/reflection.md`
+
 ## Project structure
 
 ```
@@ -76,9 +106,10 @@ calls.
 ```bash
 pytest
 ```
-25 tests covering health, full task CRUD, validation, and the status-transition
-matrix (including several proven via deliberate source breakage — see
-`Docs/Module3/debugging-log.md`).
+60 tests covering health, full task CRUD, validation, the status-transition
+matrix, due dates + overdue filtering, and search + combined filters (several
+proven via deliberate source breakage — see `docs/midcourse/verification.md`
+§6–7 and `Docs/Module3/debugging-log.md`).
 
 ## Verify
 
