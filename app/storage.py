@@ -31,6 +31,8 @@ def get_all_tasks(
     status: Optional[TaskStatus] = None,
     priority: Optional[TaskPriority] = None,
     overdue: Optional[bool] = None,
+    assignee: Optional[str] = None,
+    search: Optional[str] = None,
 ) -> list[TaskResponse]:
     tasks = list(_tasks.values())
     if status is not None:
@@ -39,6 +41,18 @@ def get_all_tasks(
         tasks = [task for task in tasks if task.priority == priority]
     if overdue is not None:
         tasks = [task for task in tasks if task.overdue == overdue]
+    # Assignee: case-insensitive exact match; a blank/whitespace value is treated
+    # as omitted (no filtering). Tasks with no assignee never match a value.
+    if assignee is not None:
+        needle = assignee.strip().lower()
+        if needle:
+            tasks = [task for task in tasks if (task.assignee or "").strip().lower() == needle]
+    # Search: case-insensitive substring over title and description; a blank/
+    # whitespace-only term is treated as omitted (no text search).
+    if search is not None:
+        term = search.strip().lower()
+        if term:
+            tasks = [task for task in tasks if term in task.title.lower() or term in task.description.lower()]
     return tasks
 
 
