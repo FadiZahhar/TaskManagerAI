@@ -178,6 +178,23 @@ Copy the completed statuses from `behavior-contract.md` and add evidence referen
 | Restored command/result | Same command → `1 passed`; full suite `.venv/bin/python -m pytest -q` → `41 passed, 3 warnings`. |
 | Final Git proof | `git diff -- app/models.py` empty; `git status` shows `app/` clean (only the intended Feature 1 test + docs remain, committed in this checkpoint). |
 
+### Break Test #2 (Feature 1) — Done-exclusion rule
+
+A second, distinct Feature 1 Break Test targeting a different semantic than #1 (which broke the strict-`<` boundary). This one breaks the "a Done task is never overdue" rule (ADR-2).
+
+| Step | Evidence |
+|---|---|
+| Selected test | `tests/test_due_dates.py::test_completed_past_due_is_not_overdue` |
+| Why important | Protects ADR-2's rule that a **completed (Done)** task is never flagged overdue, even when its due date is in the past. |
+| Clean checkpoint | `HEAD f44b436`, tree clean; `git diff -- app/models.py` empty before mutation. |
+| Correct-source command/result | `pytest tests/test_due_dates.py::test_completed_past_due_is_not_overdue` → `1 passed`. |
+| Approved temporary source mutation | `app/models.py`, `is_overdue`: removed ` or status == TaskStatus.DONE` so the guard became `if due_date is None:`. Test file unchanged. |
+| Mutated-source command/result | Same command → `1 failed`: `assert True is False` at `tests/test_due_dates.py:94`. |
+| Why failure is semantic | Without the Done clause, a Done task with a past `due_date` satisfies `due_date < today` → `overdue=True`; the test requires `False`. It fails on the exact completed-exclusion rule — not a syntax error. (Collateral: `test_is_overdue_predicate_rules` and `test_overdue_filter_returns_only_past_due_incomplete` also fail, confirming the rule is well-covered.) |
+| Source restoration | `git checkout -- app/models.py` (restores the Done clause). |
+| Restored command/result | Same command → `1 passed`; full suite `.venv/bin/python -m pytest -q` → `41 passed, 3 warnings`. |
+| Final Git proof | `git diff` empty and `git status --short` empty after restore — no temporary mutation remains. |
+
 ## 7. Break Test evidence — required test 2 (Feature 2)
 
 | Step | Evidence |
