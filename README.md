@@ -31,6 +31,11 @@ Kanban board with create/edit/delete (Module 3).
 │   ├── user-stories.md, adr-0001-stack.md, reflection-log.md   # Module 1 artifacts
 │   ├── Module2/                 # Module 2 prompts, prompt-comparison-log.md, reflection-log.md
 │   └── Module3/                 # Module 3 prompts, behavior contract, debugging log
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # CI: pytest on push / PR to main
+├── Dockerfile                   # Multi-stage, non-root, API-only image
+├── .dockerignore
 ├── requirements.txt
 ├── pytest.ini
 └── README.md
@@ -92,6 +97,29 @@ matrix (including several proven via deliberate source breakage — see
 curl -i http://127.0.0.1:8000/health
 ```
 
+## Docker
+
+Run the API as a container. The image is multi-stage, runs as a non-root
+`app` user, and is API-only (the frontend is served separately):
+
+```bash
+docker build -t task-tracker:dev .
+docker run --rm -d -p 8000:8000 --name tt-dev task-tracker:dev
+curl -i http://127.0.0.1:8000/health   # -> 200 {"status": "ok", ...}
+docker exec tt-dev whoami              # -> app
+docker stop tt-dev
+```
+
+Based on `python:3.9-slim`. See `Docs/Module4/evidence/docker-security-log.md`
+for the runtime and non-root verification.
+
+## Continuous Integration
+
+`.github/workflows/ci.yml` runs the test suite on every push and on pull
+requests targeting `main`: it sets up Python 3.9, installs `requirements.txt`,
+and runs `pytest -v`. A failing test fails the workflow — there is no
+failure-masking (`continue-on-error`, `|| true`, `--exit-zero`).
+
 ## What each module added
 
 **Module 1 — running skeleton.** `GET /health`, Swagger docs, minimal project
@@ -121,7 +149,9 @@ testing.
 ## Known limitations
 
 No authentication, no persistent database (all data is in-memory and reset
-on restart), no pagination, no Docker/deployment configuration, single
-process only. These are explicitly out of scope for this course project;
-see `Docs/adr-0001-stack.md` for the reasoning and the risk this carries as
-the project grows.
+on restart), no pagination, no deployment automation, single process only.
+(A local `Dockerfile` is provided for running the API in a container — see the
+Docker section above — but there is no orchestration or deployment pipeline.)
+These are explicitly out of scope for this course project; see
+`Docs/adr-0001-stack.md` for the reasoning and the risk this carries as the
+project grows.
