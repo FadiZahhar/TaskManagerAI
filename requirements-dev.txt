@@ -2,6 +2,6 @@
 # Used by CI and local development. NOT installed into the Docker runtime image.
 -r requirements.txt
 
-# Tests (httpx backs FastAPI's TestClient)
-httpx>=0.27
-pytest>=8.0
+# Tests (httpx backs FastAPI's TestClient). Pinned to the Python 3.9-resolved set.
+httpx==0.28.1
+pytest==8.4.2

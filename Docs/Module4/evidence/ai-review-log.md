@@ -13,7 +13,7 @@
 | ID | Claude finding | File/location | Severity | Classification | Verification performed | Decision | Justification |
 |---|---|---|---|---|---|---|---|
 | R1 | Runtime Docker image installs **test deps** (`pytest`, `httpx`) | `Dockerfile:14` + `requirements.txt` | Low-Med | **Useful** | Confirmed: `requirements.txt` bundles test deps; image installs them (also in docker-security-log) | **Fixed** — R1 resolved | Real image bloat / surface; not a correctness bug. Resolved via a runtime/dev requirements split (`requirements-dev.txt`); `pytest`/`httpx` verified absent from the rebuilt image (255/55.3 MB). |
-| R2 | **Unpinned deps** (`>=`) → non-reproducible CI/image | `requirements.txt` | Medium | **Useful** (context-dependent) | Confirmed drift: CI/Docker on 3.9 resolved fastapi 0.128.8; local 3.14 got 0.139.2 | Follow-up / no change now | Real reproducibility risk, but `requirements.txt` predates Module 4 and the project deliberately uses ranges; pinning is a separate approved decision. |
+| R2 | **Unpinned deps** (`>=`) → non-reproducible CI/image | `requirements.txt` | Medium | **Useful** (context-dependent) | Confirmed drift: CI/Docker on 3.9 resolved fastapi 0.128.8; local 3.14 got 0.139.2 | **Addressed** — R2 | Direct deps pinned to the Python 3.9-resolved set (fastapi 0.128.8, uvicorn 0.39.0, httpx 0.28.1, pytest 8.4.2); verified via a 3.9 container (25 passed) + rebuilt image. Transitive deps still pip-resolved (a full lockfile would be the next step). |
 | R3 | `on: push:` unscoped → runs on every branch/tag; PRs get duplicate (push+PR) runs | `ci.yml:3-5` | Low | **Noise** | Confirmed by reading triggers | No action | Intentional — the green→red→green proof branch must trigger CI; duplicate PR runs are acceptable here. |
 | R4 | No pip caching in CI (slower runs) | `ci.yml` | Low | **Noise** | No cache step present | No action | Guide explicitly says don't add caching without a clear need. |
 | R5 | No `HEALTHCHECK` in Dockerfile | `Dockerfile` | Low | **Noise** | Confirmed absent; `/health` works but isn't wired to a Docker probe | No action | Not required; slim image lacks a probe tool (`curl`); would add weight. |
@@ -42,7 +42,7 @@
 - **Which comments required cross-file context:** R1 (Dockerfile ↔ requirements.txt), R2 (requirements ↔ CI/Docker resolved versions).
 - **Which were noise:** R3, R4, R5, R8.
 - **Which were wrong:** R6, R7 — both plausible-sounding but disproved by the OpenAPI schema / tests.
-- **What I changed after verification:** nothing in source — no verified *Useful* finding is in-scope to fix now; R1/R2 are recorded as follow-ups requiring approval.
+- **What I changed after verification:** initially nothing; on approval, R1 and R2 were then fixed (runtime/dev requirements split, and pinned 3.9-resolved versions) and re-verified.
 
 ## Personal AI-review rule
 

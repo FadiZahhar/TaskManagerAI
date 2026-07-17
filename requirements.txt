@@ -1,4 +1,6 @@
 # Runtime dependencies only. Test/dev deps live in requirements-dev.txt so the
 # Docker runtime image (which installs this file) stays free of test packages.
-fastapi>=0.110
-uvicorn[standard]>=0.29
+# Pinned to the versions that resolve on the CI/Docker Python 3.9 target, for
+# reproducible builds (transitive deps are still resolved by pip).
+fastapi==0.128.8
+uvicorn[standard]==0.39.0
