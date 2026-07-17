@@ -120,6 +120,10 @@ requests targeting `main`: it sets up Python 3.9, installs `requirements.txt`,
 and runs `pytest -v`. A failing test fails the workflow — there is no
 failure-masking (`continue-on-error`, `|| true`, `--exit-zero`).
 
+## Technical Decisions
+
+- [In-Memory Dict as the Task Storage Layer](Docs/decisions/in-memory-task-storage.md)
+
 ## What each module added
 
 **Module 1 — running skeleton.** `GET /health`, Swagger docs, minimal project
