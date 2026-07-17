@@ -1,0 +1,5 @@
+# Runtime dependency SOURCE (human-edited). Compiled into the fully-pinned,
+# hashed lock file requirements.txt via pip-tools on the Python 3.9 target:
+#   pip-compile --generate-hashes --output-file=requirements.txt requirements.in
+fastapi>=0.110
+uvicorn[standard]>=0.29

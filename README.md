@@ -53,6 +53,18 @@ Requires Python 3.9+ (this project's venv is tested on 3.9.6 — avoid `X | None
 union-type syntax in new code, which needs 3.10+; use `typing.Optional[X]`
 instead).
 
+Dependencies are managed with `pip-tools`. Edit the sources (`requirements.in`,
+`requirements-dev.in`) and regenerate the pinned, hashed lock files on Python 3.9:
+
+```bash
+pip-compile --generate-hashes --output-file=requirements.txt requirements.in
+pip-compile --generate-hashes --output-file=requirements-dev.txt requirements-dev.in
+```
+
+`requirements.txt` is the runtime lock (used by the Docker image);
+`requirements-dev.txt` adds the test stack. Because the locks pin the
+3.9-resolved wheels, install them on Python 3.9.
+
 ## Run
 
 Two servers: the API backend, and a static file server for the frontend.

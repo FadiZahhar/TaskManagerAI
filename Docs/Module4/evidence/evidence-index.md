@@ -45,6 +45,6 @@ Branch `module-4-devops` (base `main` @ `e1cc640`). Final integration audit: 202
 
 ## Open follow-ups (from the review)
 - **R1 — RESOLVED.** Runtime/dev requirements split (`requirements-dev.txt`); the image no longer installs `pytest`/`httpx` (255/55.3 MB, down from 274/59.1). Verified by `import pytest` → ModuleNotFoundError + `/health` 200.
-- **R2 — ADDRESSED.** Direct deps pinned to the 3.9-resolved set (fastapi 0.128.8, uvicorn 0.39.0, httpx 0.28.1, pytest 8.4.2); verified on a 3.9 container (25 passed) + rebuilt image. Transitive deps still pip-resolved (a full lockfile would be the next step).
+- **R2 — RESOLVED (full lockfile).** `pip-tools` hashed lockfile: `requirements.in`/`requirements-dev.in` → `pip-compile --generate-hashes` on Python 3.9 → fully-pinned, hashed `requirements.txt` (all transitive deps) + `requirements-dev.txt`. Verified on a 3.9 container (25 passed) + hashed runtime image build.
 - **Voice** — reflection paragraphs in the decision note and tool-fit reflection are drafts to rewrite in your own words.
 - **CI URLs** — paste the three run URLs (Runs 1/2/3) into `ci-green-red-green.md` after checking the Actions tab.
