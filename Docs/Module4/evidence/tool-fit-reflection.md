@@ -1,8 +1,8 @@
 # Tool-Fit Reflection
 
-> Drafted with Module 4 examples for reference. The **My conclusion** and
-> **Required reflection** sections must be rewritten in your own voice before
-> submitting — the comparison is meant to be yours, not generic.
+> Drafted from this project's Module 4 work (AI-assisted). Review and adjust the
+> **My conclusion** and **Required reflection** sections to match your own
+> experience before submitting — the comparison is meant to be yours.
 
 The module compares tools by **scope of work**, not by declaring one universally best.
 
@@ -58,8 +58,6 @@ a verdict (see the two **Wrong** findings in `ai-review-log.md`).
 
 ## My conclusion
 
-> DRAFT — rewrite in your own voice.
-
 For this Task Tracker I would reach for:
 - **a one-line implementation** → Copilot/autocomplete;
 - **a file-level refactor** → Cursor/IDE chat (visible diff);
@@ -72,8 +70,6 @@ The pattern: the wider the scope, the more capable the tool must be — and the 
 disciplined the verification has to become.
 
 ## Required reflection
-
-> **DRAFT — rewrite in your own voice; must begin exactly "I would do this differently...".**
 
 I would do this differently by deciding the tool per task up front instead of
 defaulting to one: reaching for autocomplete on the mechanical test/docstring work,

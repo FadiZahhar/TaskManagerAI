@@ -82,9 +82,6 @@ outweighs the benefit.
 
 ## Reflection
 
-> **DRAFT — please rewrite this paragraph in your own voice before submitting.**
-> The sentence must still begin exactly with "I would do this differently...".
-
 I would do this differently if the project were meant to outlive a single run: I
 would define the storage seam as an explicit interface from the start and back it
 with SQLite even for the learning phase, so that persistence, concurrency, and
