@@ -1,165 +1,261 @@
-# Mid-Course Task Tracker — Agent Instructions
+# Module 5 Task Tracker — Agent Instructions
 
 ## Assignment objective
 
-Extend the existing Task Tracker from Modules 1–3 with exactly two small, end-to-end features while demonstrating a disciplined AI-assisted engineering workflow.
+Complete Module 5 as a repository-grounded review, governance, planning, and
+context-engineering exercise.
 
-Selected target features:
+Module 5 does not add a new application feature. The comments-on-tasks work is
+planning and critique only. Do not implement comment models, routes, storage,
+tests, frontend controls, or migrations.
 
-1. **Due dates + overdue filtering**
-2. **Search + combined filters**
+The central working rule is:
 
-The repository, existing tests, and assignment brief are the source of truth. If this file conflicts with the actual code or course brief, report the conflict before changing behavior.
+> AI proposes; the student grades.
 
-## Non-negotiable setup
+The repository, tests, course materials, and observed evidence are the source
+of truth. Report conflicts before changing behavior or documentation.
 
-- Work only on the branch `mid-course-project`.
-- Inspect the actual repository before proposing architecture or code.
-- Preserve all existing routes, enum values, status-transition rules, test fixtures, frontend states, and run commands unless a selected feature requires a narrowly justified extension.
-- Do not invent filenames, request fields, response shapes, commands, or framework conventions.
-- Do not discard, overwrite, or reformat unrelated work.
-- Do not use destructive Git commands.
-- Do not commit unless the user explicitly authorizes the commit after reviewing the diff and checks.
+## Active baseline
 
-## Source-of-truth rules
+- Work only on branch `module-5-governance`.
+- This branch is based on `origin/mid-course-project` at
+  `c2a369ee552fe328c21602f6ed44c9c4675d01e7`.
+- Use the existing tracked `Docs/` directory, with uppercase `D`.
+- The Phase 0 baseline is recorded in `Docs/module-5/evidence-index.md`.
+- The observed baseline is 60 passing tests with four warnings.
+- `module-4-devops` was not merged into this branch.
+- `CLAUDE.md` is a short Module 5 wrapper that defers to this file and adds no
+  separate branch or feature-development contract.
 
-1. Backend schemas, routes, validation, and tests define the API contract.
-2. The frontend displays and invokes the backend contract; it must not silently weaken or redefine validation.
-3. A generated diff is a proposal. Accept it only after inspection and verification.
-4. A green test is evidence only when the test asserts meaningful behavior and can be shown to fail after a controlled source mutation.
-5. Browser behavior is `PASS` only when observed. Otherwise record `NOT RUN` and provide exact manual steps.
+## Project summary and stack
 
-## Feature 1 target contract — due dates + overdue filtering
+This repository contains a FastAPI Task Tracker API and a single-file vanilla
+HTML/CSS/JavaScript Kanban frontend.
 
-The exact implementation must follow existing repository architecture, but the intended behavior is:
+Confirmed stack:
 
-- `due_date` is optional and date-only.
-- API representation should be an ISO calendar date such as `2026-07-31`, or `null` when absent.
-- Create and update flows support setting, replacing, and clearing the due date.
-- Invalid date input is rejected through backend validation with the repository-appropriate validation response, normally HTTP 422 in FastAPI.
-- Overdue semantics are backend-owned and documented. Target rule: a task is overdue when its due date is earlier than the current date and its status is not the repository's completed/done status.
+- Python 3.9-compatible source syntax.
+- FastAPI and Pydantic v2 models.
+- In-memory Python dictionary storage.
+- Pytest and FastAPI `TestClient`.
+- Vanilla HTML, CSS, and JavaScript in `frontend/index.html`.
+- No database, migration system, frontend framework, Dockerfile, or GitHub
+  Actions workflow is present on this branch.
+
+Supported setup and run commands from `README.md`:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+python3 -m http.server 5500 --directory frontend
+pytest
+```
+
+When the virtual environment is not activated, the verified equivalent test
+command is:
+
+```bash
+.venv/bin/python -m pytest
+```
+
+The backend runs at `http://127.0.0.1:8000`. The frontend is served at
+`http://127.0.0.1:5500`.
+
+## Important repository files
+
+- `app/main.py` — FastAPI application, local CORS configuration, and task CRUD
+  routes.
+- `app/models.py` — task enums, request/response models, title validation,
+  optional due dates, and the derived overdue predicate.
+- `app/storage.py` — module-level in-memory storage and server-side combined
+  filtering.
+- `app/business_rules.py` — allowed task-status transitions.
+- `app/api/routes/health.py` — `GET /health`.
+- `tests/conftest.py` — shared API client, created-task fixture, and automatic
+  storage reset.
+- `tests/test_tasks.py` — original CRUD, validation, error, and transition tests.
+- `tests/test_due_dates.py` — due-date and overdue behavior tests.
+- `tests/test_search_filters.py` — search and combined-filter tests.
+- `frontend/index.html` — complete Kanban UI, task modal, drag-and-drop, due-date
+  display, overdue indicator, and server-backed filter bar.
+- `Docs/midcourse/` — completed mid-course requirements and evidence.
+- `Docs/Module5/` — Module 5 guide and prompt-library source material.
+- `Docs/module-5/` — Module 5 evidence generated during the current work.
+
+Do not invent a file or substitute a conventional FastAPI path for an actual
+repository path.
+
+## Confirmed API and business contract
+
+### Task values and validation
+
+- Status values are exactly `ToDo`, `InProgress`, and `Done`.
+- Priority values are exactly `Low`, `Medium`, and `High`.
+- Create requires a title.
+- Titles are trimmed, must not be blank, and must contain no more than 200
+  characters.
+- Unknown request fields are rejected because request models use
+  `extra="forbid"`.
+- No backend length limit is currently visible for description or assignee; do
+  not claim one exists.
+- `due_date` is optional and date-only. It is represented as an ISO calendar
+  date or `null`.
+- Create and update support setting and clearing `due_date`.
+- Request-model and enum validation normally produces FastAPI HTTP 422
+  responses.
+
+### Overdue behavior
+
+- `overdue` is derived on `TaskResponse`; it is never stored.
+- A task is overdue when it has a due date earlier than the current UTC date and
+  its status is not `Done`.
 - A task due today is not overdue.
-- A completed task is not shown as overdue even if its due date is in the past.
-- The frontend adds a due-date input to the existing create/edit flow, displays the date on cards, and shows an overdue indicator.
-- The frontend exposes an overdue filter and preserves the existing board columns and empty/error states.
-- Do not persist a separate mutable `overdue` flag; it is derived behavior.
+- A completed past-due task is not overdue.
+- An `InProgress` past-due task is overdue.
 
-## Feature 2 target contract — search + combined filters
+### Search and filters
 
-- Extend the existing task-list endpoint rather than adding a parallel endpoint unless the repository proves that is necessary.
-- Support text search over title and description using a documented, case-insensitive substring rule.
-- Support combinations of relevant existing filters, targeting status, priority, and assignee, plus overdue when Feature 1 is available.
-- Combined filters use logical AND.
-- Omitted filters preserve existing `GET /tasks` behavior.
-- A blank or whitespace-only search term behaves like no text search.
-- Invalid enum-like filter values are rejected by backend validation rather than silently ignored.
-- No matches returns HTTP 200 with an empty list.
-- The frontend adds a compact filter/search area above the board, keeps all columns visible, preserves per-column empty states, and includes a clear/reset action.
-- Prefer server-side filtering. Do not implement only client-side filtering because the assignment assesses backend and test work.
+`GET /tasks` accepts optional status, priority, overdue, assignee, and search
+filters.
 
-## Scope controls
+- Filters combine with logical AND.
+- Omitted filters preserve normal list behavior.
+- Search is a trimmed, case-insensitive literal substring match over title or
+  description.
+- Blank search behaves as no search.
+- Assignee is a trimmed, case-insensitive exact match.
+- Blank assignee behaves as no assignee filter.
+- Invalid status, priority, or boolean filter values are rejected by FastAPI.
+- No matches returns HTTP 200 with `[]`.
+- Filtering does not mutate stored tasks.
 
-Reject or request approval before:
+### Routes and errors
 
-- introducing a database or migration system when the existing repository does not use one;
-- adding a frontend framework, state-management library, date library, or search dependency;
-- splitting a simple existing single-file frontend into a new architecture;
-- adding comments, activity logs, authentication, pagination, saved views, bulk operations, themes, or animations;
-- performing a whole-file rewrite;
-- changing existing business rules merely to simplify the new features.
+- `POST /tasks` creates a task and returns HTTP 201.
+- `GET /tasks` lists tasks and returns HTTP 200.
+- `GET /tasks/{task_id}` returns HTTP 200 or HTTP 404.
+- `PATCH /tasks/{task_id}` returns HTTP 200, HTTP 404 for a missing task, or
+  HTTP 422 for invalid input or an invalid status transition.
+- `DELETE /tasks/{task_id}` returns HTTP 204 or HTTP 404.
+- Allowed transitions are:
+  - `ToDo -> InProgress`
+  - `InProgress -> Done`
+  - `Done -> InProgress`
+- All other transitions, including same-status updates, are rejected.
 
-## Required workflow for every phase
+### Storage and frontend behavior
+
+- Tasks are stored in a module-level dictionary.
+- IDs are server-generated UUID strings.
+- Created and updated timestamps use UTC.
+- Data is lost when the process restarts.
+- The design assumes one process and does not provide durable or
+  concurrency-safe persistence.
+- The frontend keeps all three Kanban columns visible.
+- Filtering is server-side.
+- The frontend uses `http://127.0.0.1:8000` as its API base.
+- CORS allows only the documented local frontend origins.
+- Browser behavior is confirmed only when actually observed.
+
+## Module 5 deliverables
+
+Core expected artifacts are:
+
+- `AGENTS.md`
+- `Docs/security-review.md`
+- `Docs/governance-worksheet.md`
+- `Docs/decisions/comments-feature-plan.md`
+- `Docs/architecture-A.md`
+- `Docs/architecture-B.md`
+- `Docs/architecture-C.md`
+- `Docs/architecture.md`
+- `Docs/ai-playbook.md`
+- `Docs/module-5/evidence-index.md`
+
+Supporting evidence may be placed under `Docs/module-5/`.
+
+## Module 5 guardrails
+
+- Begin investigations read-only.
+- Keep normal Module 5 writes within `AGENTS.md` and `Docs/`.
+- Do not modify `app/`, `tests/`, `frontend/`, dependencies, configuration, or
+  prior-module evidence unless the user approves one exact change after
+  reviewing its proposed diff.
+- A security fix is optional. It requires a confirmed Valid finding, a minimal
+  proposed diff, explicit approval, focused verification, and full-suite
+  verification.
+- Do not implement the comments feature.
+- Do not merge `module-4-devops` or another branch without explicit approval.
+- Do not add a database, dependency, framework, authentication system,
+  pagination, deployment system, or new product feature.
+- Do not rewrite or reformat unrelated files.
+- Use one bounded task per phase and stop at the requested phase.
+- Use fresh threads where the Module 5 experiment requires independent context.
+- The generic comments plan must be produced without repository context.
+- Architecture Strategies A, B, and C must remain separate; preserve their
+  original drafts before comparison.
+- Strategy C may read only its approved anchor files.
+- Codex may scaffold or review the personal playbook, but the student writes the
+  final rules, Decision Card, judgments, and reflection.
+- Do not commit, push, open a pull request, reset, delete, or rewrite Git history
+  without explicit user authorization after diff and verification review.
+
+## Evidence and governance rules
+
+- Cite exact repository files and line numbers when available.
+- Distinguish confirmed facts, inferences, assumptions, and unavailable context.
+- Remove claims based only on framework convention.
+- Never fabricate a prompt response, test result, browser observation, failure,
+  screenshot, commit hash, or security finding.
+- Use `NOT RUN` when browser or runtime behavior was not observed.
+- Working evidence may say `Not started` or `NOT RUN`; final submitted artifacts
+  must contain no unresolved placeholders.
+- Never expose or reproduce credentials, tokens, secrets, personal data,
+  production data, or private configuration.
+- Describe a sensitive-data category without copying its value.
+- Security grades, manual findings, priorities, governance classifications,
+  ownership answers, plan grades, context-strategy choice, and playbook rules
+  remain student decisions.
+- Treat known educational limitations separately from production
+  vulnerabilities.
+- Do not invent a You-only security finding merely to fill a table.
+
+## Required workflow
+
+For every bounded phase:
 
 1. Inspect the exact files and symbols involved.
-2. State a narrow plan and acceptance evidence.
-3. Make the smallest coherent change.
-4. Show a focused diff summary.
-5. Run the smallest relevant check first.
-6. Run the broader relevant suite at a milestone.
-7. Verify the app or provide explicit manual checks marked `NOT RUN`.
-8. Update the relevant file in `docs/midcourse/` with observed evidence only.
-9. Stop at the requested phase; do not continue automatically.
+2. State the narrow task, planned files, and acceptance evidence.
+3. Work read-only until the draft has been reviewed.
+4. Request approval for the exact write.
+5. Modify only the approved file or files.
+6. Show `git status --short`, a focused diff, and `git diff --check`.
+7. Run the smallest relevant check first.
+8. Run the broader relevant suite at a milestone.
+9. Record browser verification as PASS only when observed; otherwise use NOT RUN
+   with exact manual steps.
+10. Update `Docs/module-5/evidence-index.md` using observed evidence only.
+11. Stop for review; do not continue automatically.
 
-## Testing protocol
+Before an approved write, report:
 
-- Follow the repository's existing pytest fixture and naming conventions.
-- Establish state through public API calls when practical.
-- Keep one primary behavior per test.
-- Assert both the status code and a meaningful response or state property.
-- Add at least four new tests total; target at least four useful tests per selected feature.
-- Run targeted tests before the full suite.
-- Do not weaken assertions or change a correct expected result to match broken source code.
+1. Files inspected.
+2. Proposed target.
+3. Draft content or diff.
+4. Assumptions and unsupported claims.
+5. Verification planned.
 
-Suggested Feature 1 cases, subject to the actual contract:
-
-- create with a valid due date;
-- invalid date format/value is rejected;
-- update and clear a due date;
-- overdue filtering returns only past-due, non-completed tasks;
-- a due-today task is not overdue;
-- a completed past-due task is not overdue.
-
-Suggested Feature 2 cases, subject to the actual contract:
-
-- search matches title;
-- search matches description;
-- search is case-insensitive;
-- status + priority combination uses AND;
-- no match returns `200` and `[]`;
-- invalid status or priority filter returns the backend-defined validation response.
-
-## Break Test protocol
-
-Complete at least two controlled Break Tests: one important test for each feature.
-
-Before each Break Test:
-
-- confirm a clean checkpoint;
-- identify one minimal temporary source mutation;
-- explain why the selected test should fail;
-- do not modify the test;
-- obtain explicit approval for the mutation.
-
-Execution sequence:
-
-1. Correct source: targeted test passes.
-2. Apply only the approved source mutation.
-3. Targeted test fails for the expected semantic reason.
-4. Capture the relevant failure output.
-5. Restore the exact source.
-6. Targeted test passes again.
-7. Confirm with `git diff`/`git status` that no accidental mutation remains.
-8. Record the pass → fail → restored pass evidence in `docs/midcourse/verification.md`.
-
-## Documentation contract
-
-Required files live in `docs/midcourse/`:
-
-- `user-stories.md`
-- `mini-adr.md`
-- `prompt-log.md`
-- `verification.md`
-- `reflection.md`
-
-Supporting files in this pack are also expected to be maintained:
-
-- `behavior-contract.md`
-- `claude-prompts.md`
-- `submission-checklist.md`
-- `evidence/README.md`
-
-Never fabricate a prompt response, test result, browser observation, commit hash, screenshot, or failure. Use `TBD`, `NOT RUN`, or a clearly marked placeholder until observed.
-
-## Required handoff after every Claude task
-
-Report:
+After the write, report:
 
 1. Files inspected.
 2. Files changed.
 3. What changed and why.
 4. Diff risks or assumptions.
 5. Commands run and exact results.
-6. Verification status as `PASS`, `FAIL`, or `NOT RUN`.
+6. Verification status as PASS, FAIL, or NOT RUN.
 7. Documentation updated.
 8. Remaining risks.
 9. Next smallest recommended step.

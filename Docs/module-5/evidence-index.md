@@ -50,11 +50,29 @@ of completion.
 - Module 5 remains docs-first and read-only by default.
 - No application edit, merge, commit, or push was approved for Phase 0.
 
+## External checkpoint observed during Phase 1
+
+- Commit `e4c7414a7532b572634bc9b1ce3ba7c1b842e194` (`first commit module 5`)
+  was created by the repository owner at 2026-07-18 00:48:07 EEST and pushed
+  to `origin/mid-course-project` at 00:48:10 EEST.
+- The commit added the Module 5 guide, prompt-library PDF, and this Phase 0
+  evidence index.
+- Codex did not create or push the checkpoint and did not alter or undo it.
+
 ## Part 5.1 — Setup and grounding
 
-- Status: **Not started**
-- Planned evidence: root `AGENTS.md` review, project-evidence smoke test, and
-  recent-files smoke test.
+- Status: **PASS — completed 2026-07-18**
+- Root `AGENTS.md` was replaced with the approved repository-specific Module 5
+  instructions.
+- Project-evidence smoke test: **PASS — five file-grounded claims; all cited
+  sources were opened and checked**.
+- Recent-files smoke test: **PASS — filesystem metadata only; three selected
+  files were opened before description**.
+- `CLAUDE.md` alignment: **PASS — legacy mid-course directions were replaced
+  with a Module 5 wrapper that defers to `AGENTS.md`**.
+- Evidence: `Docs/module-5/setup-smoke-tests.md`.
+- Browser verification: **NOT RUN — not required for the grounding checks**.
+- Commit status: **Not committed; explicit approval has not been given**.
 
 ## Part 5.2 — Security review
 

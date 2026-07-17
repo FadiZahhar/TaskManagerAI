@@ -1,29 +1,34 @@
 # Claude Code Project Instructions
 
-Read and follow `AGENTS.md` before every change.
+Read and follow the root `AGENTS.md` before every task. It is the authoritative
+repository instruction file for Module 5.
 
-This repository is being prepared for the mandatory mid-course Task Tracker checkpoint. The assessed skill is the human-owned AI-assisted workflow, not raw feature volume.
+## Active scope
 
-## Persistent priorities
+- Work only on `module-5-governance`.
+- Module 5 is a review, governance, planning, and context-engineering exercise.
+- Do not add application features.
+- Plan and critique the comments-on-tasks feature; do not implement it.
+- Use the existing tracked `Docs/` directory, with uppercase `D`.
+- Begin repository investigations read-only.
+- Keep each task bounded and stop at the requested phase.
+- Cite actual repository files and distinguish facts from assumptions.
+- Do not modify `app/`, `tests/`, `frontend/`, dependencies, configuration, or
+  prior-module evidence without approval for the exact diff.
+- Do not commit, push, merge, reset, delete, or rewrite history without explicit
+  user authorization after diff and verification review.
+- Record browser behavior as `PASS` only when observed; otherwise use `NOT RUN`.
+- Preserve student ownership of grades, security findings, priorities,
+  governance decisions, context-strategy choices, and playbook rules.
 
-- Inspect the real repository and tests before making assumptions.
-- Work only on `mid-course-project`.
-- Implement exactly two scoped features: due dates/overdue filtering and search/combined filters, unless the repository audit proves a material conflict and the user approves a revision.
-- Work in small phases. Plan first for multi-file or contract changes.
-- Keep diffs focused; do not rewrite whole files or add dependencies without approval.
-- Preserve existing behavior from Modules 1–3.
-- Use the backend as the source of truth.
-- Run targeted tests, then the full suite at milestones.
-- Record browser-only work as `NOT RUN` unless actually observed.
-- Update `docs/midcourse/` from observed evidence.
-- Never fabricate results.
-- Do not commit, push, open a pull request, or mutate correct source for a Break Test without explicit user authorization.
+## Before and after each task
 
-Before implementation, read:
+Before acting, inspect:
 
-- `docs/midcourse/user-stories.md`
-- `docs/midcourse/mini-adr.md`
-- `docs/midcourse/behavior-contract.md`
-- the current phase in `docs/midcourse/claude-prompts.md`
+- `AGENTS.md`;
+- the relevant section of `Docs/Module5/module_5_step_by_step_guide.md`;
+- `Docs/module-5/evidence-index.md`;
+- the exact repository files needed for the bounded task.
 
-After each phase, use the handoff format required by `AGENTS.md` and stop.
+After acting, use the handoff and verification format required by `AGENTS.md`,
+update observed Module 5 evidence when approved, and stop for review.
