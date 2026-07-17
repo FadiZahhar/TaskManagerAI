@@ -49,7 +49,7 @@ A minimal FastAPI task-tracking API with a vanilla HTML/CSS/JS Kanban frontend, 
 
 ```bash
 # setup
-python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements-dev.txt
 # run backend  -> http://127.0.0.1:8000
 uvicorn app.main:app --reload
 # run frontend -> http://127.0.0.1:5500

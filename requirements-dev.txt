@@ -1,0 +1,7 @@
+# Development / test dependencies: runtime deps plus the test stack.
+# Used by CI and local development. NOT installed into the Docker runtime image.
+-r requirements.txt
+
+# Tests (httpx backs FastAPI's TestClient)
+httpx>=0.27
+pytest>=8.0

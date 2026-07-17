@@ -29,3 +29,4 @@ Docs
 *.md
 Dockerfile
 .dockerignore
+requirements-dev.txt

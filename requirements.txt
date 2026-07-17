@@ -1,7 +1,4 @@
-# Runtime
+# Runtime dependencies only. Test/dev deps live in requirements-dev.txt so the
+# Docker runtime image (which installs this file) stays free of test packages.
 fastapi>=0.110
 uvicorn[standard]>=0.29
-
-# Tests (httpx backs FastAPI's TestClient)
-httpx>=0.27
-pytest>=8.0

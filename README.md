@@ -46,7 +46,7 @@ Kanban board with create/edit/delete (Module 3).
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # runtime + tests (Docker uses runtime-only requirements.txt)
 ```
 
 Requires Python 3.9+ (this project's venv is tested on 3.9.6 — avoid `X | None`

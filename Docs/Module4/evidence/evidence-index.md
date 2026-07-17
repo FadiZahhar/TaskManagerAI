@@ -44,7 +44,7 @@ Branch `module-4-devops` (base `main` @ `e1cc640`). Final integration audit: 202
 | Final commit (before this index) | `d0bf8d2` (Phase 6) |
 
 ## Open follow-ups (from the review)
-- **R1** — runtime image installs test deps (`pytest`/`httpx`); needs a runtime-only requirements split (approval required).
+- **R1 — RESOLVED.** Runtime/dev requirements split (`requirements-dev.txt`); the image no longer installs `pytest`/`httpx` (255/55.3 MB, down from 274/59.1). Verified by `import pytest` → ModuleNotFoundError + `/health` 200.
 - **R2** — unpinned `>=` dependencies cause CI/image drift (pinning is a separate approved decision).
 - **Voice** — reflection paragraphs in the decision note and tool-fit reflection are drafts to rewrite in your own words.
 - **CI URLs** — paste the three run URLs (Runs 1/2/3) into `ci-green-red-green.md` after checking the Actions tab.

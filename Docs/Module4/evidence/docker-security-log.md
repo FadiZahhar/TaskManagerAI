@@ -9,7 +9,8 @@
 - **Build command:** `docker build -t task-tracker:dev .`
 - **Build result:** Success.
 - **Runtime base:** `python:3.9-slim` → Python **3.9.25**, Debian GNU/Linux 13 (trixie) slim. Explicit slim tag; **no `latest`**.
-- **Image size:** 274 MB disk usage / 59.1 MB content size (`docker image ls task-tracker:dev`).
+- **Image size:** 255 MB disk usage / 55.3 MB content size (after the R1 runtime/dev
+  dependency split; was 274 MB / 59.1 MB when test deps were bundled).
 - **Design:** multi-stage — `builder` installs deps with `pip --prefix=/install`; `runtime` copies `/install` → `/usr/local` and `app/` only.
 
 ## Non-root user
@@ -56,6 +57,6 @@ Image `/app` contains only the `app/` package (`main.py`, `models.py`, `storage.
 
 ## Remaining risks or limitations
 
-- **Test deps in runtime image.** `requirements.txt` bundles `pytest`/`httpx`, so the runtime image installs them (there is no separate runtime-only requirements file — see `Docs/Module4/placeholder-values.md` §5). Not a secret/security issue, but the image is larger than a pure-runtime image would be.
+- **Test deps in runtime image — RESOLVED (R1).** `requirements.txt` is now runtime-only; test deps moved to `requirements-dev.txt`. Verified in the rebuilt image: `import pytest` and `import httpx` → `ModuleNotFoundError`, while `fastapi`/`uvicorn` import fine and `/health` still returns 200. Image shrank to 255 MB / 55.3 MB.
 - **Patch version drift.** `python:3.9-slim` provides Python **3.9.25**; the repo README says "tested on 3.9.6". Same minor line (3.9), newer patch.
 - **No image vulnerability scan** was run (out of scope for this phase).
