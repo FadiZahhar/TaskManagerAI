@@ -58,6 +58,11 @@ of completion.
 - The commit added the Module 5 guide, prompt-library PDF, and this Phase 0
   evidence index.
 - Codex did not create or push the checkpoint and did not alter or undo it.
+- A later repository-owner checkpoint, commit
+  `c40fc8c4d864048325d498967bd89bb43ce03ffa` (`fixing teh agaent and claude md file`),
+  contains the approved Module 5 `AGENTS.md`, aligned `CLAUDE.md`, setup smoke
+  tests, and updated evidence index. The working branch now tracks
+  `origin/module-5-governance`.
 
 ## Part 5.1 — Setup and grounding
 
@@ -72,12 +77,40 @@ of completion.
   with a Module 5 wrapper that defers to `AGENTS.md`**.
 - Evidence: `Docs/module-5/setup-smoke-tests.md`.
 - Browser verification: **NOT RUN — not required for the grounding checks**.
-- Commit status: **Not committed; explicit approval has not been given**.
+- Checkpoint: commit `c40fc8c4d864048325d498967bd89bb43ce03ffa`,
+  created and pushed by the repository owner.
 
 ## Part 5.2 — Security review
 
-- Status: **Not started**
-- Planned artifact: `Docs/security-review.md`.
+- Status: **PASS — documentation prepared 2026-07-18**
+- Raw AI audit: `Docs/module-5/security-audit-raw.md`.
+- Final graded artifact: `Docs/security-review.md`.
+- Audit mode: **PASS — source review was read-only; runtime probes used only
+  in-memory `TestClient` state and reset it after execution**.
+- Student-confirmed grades: S1 Valid, S2 Valid, S3 Valid, S4 Valid, S5 Noise.
+- Manual scan: **Student-confirmed; no genuine You-only finding was retained**.
+  The empty column is explained rather than filled with an invented issue.
+- Reconciliation: **PASS — Agreement, AI-only, and You-only columns are
+  present**.
+- Backlog: **PASS — all three ranked items use findings graded Valid**.
+- Course scope: **PASS — authentication, resource controls, and in-memory
+  storage are distinguished from production requirements**.
+- Targeted runtime evidence: explicit `null` updates returned HTTP 200 and
+  corrupted stored required fields; later search or transition requests
+  reproduced HTTP 500 for title, description, and status cases.
+- Input-bound evidence: a 10,000-character description and assignee were
+  accepted with HTTP 201.
+- Dependency consistency: **PASS — `pip check` reported no broken
+  requirements**.
+- Vulnerability database scan: **NOT RUN — `pip-audit` is not installed**.
+- Optional fix: **Not applied — S1 requires field-semantics decisions and
+  regression tests, so it is not a safe one-line Module 5 change**.
+- Application and test edits: **None**.
+- Browser verification: **NOT RUN — not required for this source audit**.
+- Full pytest suite in Phase 2: **NOT RUN — documentation-only work; the Phase
+  0 baseline remains 60 passed**.
+- Commit status: **Not committed; review and explicit commit approval are
+  required**.
 
 ## Part 5.3 — Governance
 
