@@ -59,7 +59,7 @@ docs/
 
 The lecture does not require every recommended filename above. They make the work easier to demonstrate and assess.
 
-> **⚠ This repository uses `Docs/` (capital D), not `docs/`.** The tracked documentation directory is `Docs/` (`git ls-files`). This guide writes evidence under lowercase `docs/…`; on case-insensitive macOS that lands in the same `Docs/` folder, but on case-sensitive Linux (GitHub Actions) `docs/` and `Docs/` are **different** directories. Use `Docs/module-4/` and `Docs/decisions/` throughout this guide to stay consistent with the repo and avoid CI path breakage.
+> **⚠ This repository uses `Docs/` (capital D), not `docs/`.** The tracked documentation directory is `Docs/` (`git ls-files`), and Module 4 material lives under `Docs/Module4/`. Where the templates below say `docs/module-4/…`, write generated **evidence** files to **`Docs/Module4/evidence/…`** instead, and the technical note to `Docs/decisions/…`. This matters on case-sensitive Linux (GitHub Actions), where `docs/` and `Docs/` are **different** directories.
 
 ---
 
