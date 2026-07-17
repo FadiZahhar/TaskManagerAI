@@ -1,0 +1,31 @@
+# Version control / CI
+.git
+.gitignore
+.github
+
+# Python environments and caches
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.coverage
+htmlcov
+
+# Build artifacts
+dist
+build
+node_modules
+
+# Secrets / local-machine files
+.env
+.env.*
+
+# Not needed in the API image (app does not serve the frontend)
+tests
+frontend
+Docs
+*.md
+Dockerfile
+.dockerignore
