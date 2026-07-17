@@ -59,6 +59,8 @@ docs/
 
 The lecture does not require every recommended filename above. They make the work easier to demonstrate and assess.
 
+> **⚠ This repository uses `Docs/` (capital D), not `docs/`.** The tracked documentation directory is `Docs/` (`git ls-files`). This guide writes evidence under lowercase `docs/…`; on case-insensitive macOS that lands in the same `Docs/` folder, but on case-sensitive Linux (GitHub Actions) `docs/` and `Docs/` are **different** directories. Use `Docs/module-4/` and `Docs/decisions/` throughout this guide to stay consistent with the repo and avoid CI path breakage.
+
 ---
 
 ## 3. Placeholders used in this guide
@@ -70,11 +72,15 @@ Replace these placeholders before running commands:
 | `<DEFAULT_BRANCH>` | Main integration branch | `main` |
 | `<MODULE_BRANCH>` | Your Module 4 working branch | `module-4-devops` |
 | `<REPO_URL>` | GitHub repository URL | Your repository URL |
-| `<PYTHON_VERSION>` | Exact project Python version | `3.11` if confirmed |
+| `<PYTHON_VERSION>` | Exact project Python version | `3.9` — README says tested on 3.9.6; **no pinned version file exists** |
 | `<TEST_COMMAND>` | Exact test command used by the repository | `pytest -v` |
 | `<RUN_COMMAND>` | Exact local app command | `uvicorn app.main:app --reload --port 8000` |
 | `<REQUIREMENTS_FILE>` | Dependency file | `requirements.txt` |
 | `<DECISION_SLUG>` | Technical note filename | `in-memory-task-storage` |
+
+> **Repo-specific values sheet:** A verified substitution table for every placeholder above lives at `Docs/Module4/placeholder-values.md`.
+>
+> **Python version has no pin in this repo.** The only evidence is `README.md` ("3.9+ … tested on 3.9.6"); there is no `.python-version`, `pyproject.toml`, `setup.cfg`, or `runtime.txt`. Wherever later phases require "the exact Python version confirmed by repository evidence" (CI in Phase 2, Docker in Phase 3), that evidence is the README. Pin `3.9`, and consider adding a version file so CI and Docker have an authoritative source.
 
 Commands below assume Bash, Zsh, Git Bash, WSL, or a similar shell. On Windows PowerShell, some activation and file-listing commands differ, but the verification logic is the same.
 
@@ -189,6 +195,8 @@ Do not start Claude Code from:
 - a folder containing unrelated projects.
 
 ## Step 0.2 — Start from a clean branch
+
+> **Note — two independent tracks.** This repository also contains a **standalone** mid-course project (`CLAUDE.md` / `AGENTS.md`: due dates + search on the `mid-course-project` branch). It is **unrelated to Module 4**. Module 4 continues from the Module 3 state on the main line — create the `module-4-devops` branch from `main` (Module 3), not from `mid-course-project`.
 
 First inspect:
 
@@ -588,7 +596,7 @@ The exercise proves that you can use plan mode. Unless the instructor explicitly
 ### Copy/paste prompt P3 — Business-rule question
 
 ```text
-Using @app/main.py, @app/models.py, and any directly relevant service or test files, explain the actual task status transition rules.
+Using @app/main.py, @app/models.py, @app/business_rules.py, and any directly relevant service or test files, explain the actual task status transition rules.
 
 Report:
 1. all valid status values;
@@ -606,7 +614,7 @@ Adapt file references if your repository uses different paths.
 ### Copy/paste prompt P4 — Route and status-code question
 
 ```text
-Using @app/main.py and the relevant schema and test files, create a route table for the Task Tracker API.
+Using @app/main.py, @app/api/routes/health.py, and the relevant schema and test files, create a route table for the Task Tracker API.
 
 For each route include:
 - HTTP method;
@@ -1050,6 +1058,8 @@ Before generating files, confirm:
 - whether native build tools are needed;
 - whether tests are needed in the runtime image.
 
+> **⚠ This app does not serve the frontend.** There is no `StaticFiles` mount anywhere in `app/` (verified). The Kanban UI (`frontend/index.html`) is served out-of-process by `python3 -m http.server 5500 --directory frontend` and calls the API at `http://127.0.0.1:8000`. Build an **API-only** image: do **not** copy `frontend/` into it. The container will pass `/health` but will not serve the UI — that is expected and correct for this repo.
+
 ## Copy/paste prompt P8 — Docker read-only analysis
 
 ```text
@@ -1182,6 +1192,8 @@ tests
 ```
 
 Only exclude `tests` if tests are not required in the runtime image.
+
+> **Note for this repo:** `requirements.txt` bundles test dependencies (`pytest`, `httpx`) with runtime ones (`fastapi`, `uvicorn`). Excluding `tests/` via `.dockerignore` does **not** remove those libraries from the image — they are still installed from `requirements.txt`. Either accept this, or record it as a known limitation in the Docker security log. There is no separate `requirements-dev.txt`.
 
 Inspect:
 
