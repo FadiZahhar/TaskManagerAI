@@ -9,7 +9,7 @@ def test_create_task_valid_returns_201_with_full_body(client):
             "assignee": "Alex",
         },
     )
-    assert response.status_code == 201
+    assert response.status_code == 200  # DELIBERATELY WRONG (CI proof): route returns 201
     body = response.json()
     assert body["title"] == "Write report"
     assert body["description"] == "Quarterly report"
