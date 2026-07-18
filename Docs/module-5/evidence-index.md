@@ -85,6 +85,10 @@ of completion.
   `0f94c6b1530e5fa84085b6017c65b0f292604e2c` (`adding this`). Local HEAD and
   `origin/module-5-governance` were synchronized at the latter commit when the
   final architecture document was assembled.
+- The repository owner then created and pushed
+  `2d15ad89bad7499f98c3580398a85e3afa384855` (`architecture.md file`), which
+  added the final architecture document and checkpointed its evidence-index
+  update. Codex did not create or push this commit.
 
 ## Part 5.1 — Setup and grounding
 
@@ -210,8 +214,7 @@ of completion.
 
 ## Part 5.5 — Context engineering
 
-- Status: **PASS with one student confirmation remaining — documentation
-  completed 2026-07-18**.
+- Status: **PASS — documentation completed 2026-07-18**.
 - Preserved drafts: `Docs/architecture-A.md`, `Docs/architecture-B.md`, and
   `Docs/architecture-C.md`.
 - Final artifact: `Docs/architecture.md`.
@@ -232,32 +235,45 @@ of completion.
 - Full test suite after final architecture assembly: **PASS — 60 passed with
   four warnings via `.venv/bin/python -m pytest` on 2026-07-18**.
 - Application changes: **PASS — none made for this phase**.
-- Fresh-thread evidence: **Student confirmation required — the supplied
-  context describes three context strategies and a clean rerun of C, but the
-  repository cannot independently prove that A and B were created in genuinely
-  fresh threads**.
+- Fresh-thread evidence: **PASS — the student confirmed that A and B were
+  created in fresh threads; the supplied scorecard identifies C as the clean
+  rerun and excludes the earlier contaminated attempt**.
 - Draft checkpoints: **A and B are preserved in `1166557`; C is preserved in
   the separate `0f94c6b` checkpoint**.
-- Commit status: **Not committed; explicit commit approval is still required**.
+- Final architecture checkpoint: commit
+  `2d15ad89bad7499f98c3580398a85e3afa384855`, created and pushed by the
+  repository owner.
 
 ## Part 5.6 — Personal AI coding playbook
 
-- Status: **Needs student-authored decisions — not complete**.
-- Required artifact: `Docs/ai-playbook.md` is not present.
+- Status: **PASS — student approved 2026-07-18**.
+- Artifact: `Docs/ai-playbook.md`.
 - Existing student-approved evidence available for reuse: the three concrete
   rules in `Docs/governance-worksheet.md:122-128`, the ownership conclusion at
   `Docs/governance-worksheet.md:115-120`, the security-review observation at
   `Docs/security-review.md:49-54`, and the context-engineering rule in
   `Docs/architecture.md`.
-- Decision Card: **Not completed — the student must choose tools for a new
-  feature, code review, debugging, and infrastructure, plus the never-paste
-  category and strongest rule**.
-- Student voice: **Cannot be graded because no student-written playbook draft
-  exists**.
-- Codex review: **NOT RUN — review requires the student's draft first**.
-- Recommended reread date if the playbook is completed on 2026-07-18:
-  **2026-08-17**.
+- Student decisions: **PASS — the student explicitly accepted all six
+  task-shaped recommendations and their evidence-based rationale**.
+- Decision Card: **PASS — new feature, code review, debugging, infrastructure,
+  never-paste data, and strongest-rule entries have no blanks**.
+- Task-shape choices: **PASS — Claude Code is selected for repository-wide
+  feature and infrastructure work; Codex App for evidence-based review;
+  debugging distinguishes backend/test evidence from UI/browser evidence**.
+- Concrete never-paste rule: **PASS — credentials, tokens, private keys,
+  unredacted environment files, production configuration, and real
+  personal/customer data are named without reproducing values**.
+- Codex review: **PASS — 684 words, all required sections present, rules tied to
+  course incidents, practical checks, no unresolved placeholder pattern, and
+  no confidential value reproduced**.
+- Student voice: **PASS — after Codex assembled the draft from previously
+  approved rules and the six accepted decisions, the student reviewed and
+  explicitly approved the final wording**.
+- Reread commitment: **PASS — 2026-08-17, approximately 30 days after
+  completion**.
 - Application and test edits: **None**.
+- Commit authorization: **PASS — the student explicitly authorized committing
+  `Docs/ai-playbook.md` and `Docs/module-5/evidence-index.md` after review**.
 
 ## Final deliverable matrix
 
@@ -267,15 +283,15 @@ of completion.
 | 5.2 | `Docs/security-review.md` | Student grades, manual scan, reconciliation, and ranked backlog | **Complete** | None; optional fix remains deliberately backlogged |
 | 5.3 | `Docs/governance-worksheet.md` | Risk classifications, code ownership answers, reflection, and three approved rules | **Complete** | None |
 | 5.4 | `Docs/decisions/comments-feature-plan.md` | Section grades, grounded corrections, generic-plan comparison, and open decisions | **Complete** | Do not implement comments in Module 5 |
-| 5.5 | `Docs/architecture-A.md`, `Docs/architecture-B.md`, `Docs/architecture-C.md`, `Docs/architecture.md` | Approved scorecard, Strategy A verdict, corrections, and context rule | **Documentation complete; confirmation needed** | Student confirms A and B were created in genuinely fresh threads |
-| 5.6 | `Docs/ai-playbook.md` | Student voice, Decision Card, strongest rule, and reread commitment | **Not complete — artifact missing** | Student writes the playbook and answers all six Decision Card prompts |
+| 5.5 | `Docs/architecture-A.md`, `Docs/architecture-B.md`, `Docs/architecture-C.md`, `Docs/architecture.md` | Approved scorecard, Strategy A verdict, corrections, context rule, and fresh-thread confirmation | **Complete** | None |
+| 5.6 | `Docs/ai-playbook.md` | Accepted tool choices, approved rules, Decision Card, course evidence, reread commitment, and final voice approval | **Complete** | None |
 
 ## Final verification
 
-- Status: **Needs student action — audit completed 2026-07-18, submission not
-  ready**.
-- Core artifact inventory: **9 of 10 present; `Docs/ai-playbook.md` is missing**.
-- Placeholder scan: **PASS for all available core artifacts — no unresolved
+- Status: **PASS — student reviewed the final wording and declared the Module 5
+  documentation ready on 2026-07-18**.
+- Core artifact inventory: **PASS — all 10 core artifacts are present**.
+- Placeholder scan: **PASS for all core artifacts — no unresolved
   placeholder pattern matched**.
 - Suspicious tracked filename scan: **PASS — no common `.env`, secret,
   credential, token, private-key, PEM, or key filename matched; Git history and
@@ -288,13 +304,11 @@ of completion.
 - Browser verification: **NOT RUN — no application behavior was changed in the
   remaining documentation work**.
 - Diff whitespace check: **PASS — `git diff --check` and the no-index check for
-  the new architecture file produced no whitespace errors**.
-- Branch synchronization before remaining writes: **PASS — HEAD and
-  `origin/module-5-governance` were both at `0f94c6b`**.
-- Remaining human decisions: **confirm fresh-thread separation for A and B;
-  write the personal playbook in the student's voice; complete the Decision
-  Card; decide final readiness after reviewing the final diff**.
-- Uncommitted files: `Docs/architecture.md` and
-  `Docs/module-5/evidence-index.md`.
-- Final commit: **Not created; explicit approval after diff and verification
-  review is required**.
+  the new playbook file produced no whitespace errors**.
+- Branch synchronization: **PASS — latest observed HEAD and
+  `origin/module-5-governance` were both at `2d15ad8`**.
+- Final human decision: **PASS — the student, not Codex, decided that the
+  documentation is ready after reviewing the playbook wording**.
+- Final documentation commit: **Authorized for the playbook and evidence
+  index; the immutable hash is reported from Git immediately after creation
+  because a commit cannot contain its own final hash**.
