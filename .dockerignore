@@ -1,0 +1,33 @@
+# Version control / CI
+.git
+.gitignore
+.github
+
+# Python environments and caches
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.coverage
+htmlcov
+
+# Build artifacts
+dist
+build
+node_modules
+
+# Secrets / local-machine files
+.env
+.env.*
+
+# Not needed in the API image (the app does not serve the frontend; the
+# frontend is served separately as static files). Also keeps operator input
+# such as CLAUDE_FINAL_PROJECT_AUTOPILOT.md out of the build context.
+tests
+frontend
+Docs
+*.md
+Dockerfile
+.dockerignore
