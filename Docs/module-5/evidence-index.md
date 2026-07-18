@@ -67,6 +67,16 @@ of completion.
   `646f3658d8ab55001b836b8e75bcee0b4ff7ff69` (`enhancements`). Before Phase 3
   began, local HEAD and `origin/module-5-governance` were synchronized at that
   commit (`0` ahead, `0` behind), and the worktree was clean.
+- Phase 3 was committed and pushed by the repository owner as
+  `f61b6023b8ff10912e3fdcc6f4cbe99edcc0223e` (`governance worksheet`). Before
+  Phase 4 began, local HEAD and `origin/module-5-governance` were synchronized
+  at that commit (`0` ahead, `0` behind), and the worktree was clean.
+- The frozen generic comments baseline was committed and pushed by the
+  repository owner during Phase 4 as
+  `98648760082917cdc145a98e0ed8fefa7d8aad9b` (`comments plan generic`). Before
+  the final Phase 4 document was written, local HEAD and
+  `origin/module-5-governance` were synchronized at that commit (`0` ahead,
+  `0` behind).
 
 ## Part 5.1 — Setup and grounding
 
@@ -143,13 +153,52 @@ of completion.
   and historical evidence; it makes no new browser-behavior claim**.
 - Test suite: **NOT RUN — documentation-only change**.
 - Application and test edits: **None**.
-- Commit status: **Not committed; review and explicit commit approval are
-  required**.
+- Checkpoint: commit `f61b6023b8ff10912e3fdcc6f4cbe99edcc0223e`,
+  created and pushed by the repository owner.
 
 ## Part 5.4 — Comments-feature planning
 
-- Status: **Not started**
-- Planned artifact: `Docs/decisions/comments-feature-plan.md`.
+- Status: **PASS — documentation prepared 2026-07-18**
+- Generic baseline: `Docs/module-5/comments-plan-generic.md`.
+- Final reviewed plan: `Docs/decisions/comments-feature-plan.md`.
+- Generic context: **PASS — generated in a fresh context without repository
+  access, source files, filenames, or repository summaries**.
+- Generic freeze: **PASS — the attachment text was preserved; the repository
+  file differs only by a standard final newline and was not revised after the
+  grounded plan was read**.
+- Generic checkpoint: commit
+  `98648760082917cdc145a98e0ed8fefa7d8aad9b`, created and pushed by the
+  repository owner.
+- Grounded context: **PASS — generated in a separate fresh repository thread
+  that explicitly did not read the generic baseline**.
+- Grounded plan scope: **PASS — P15 planning only; no files were edited and no
+  comments feature was implemented**.
+- Self-critique: **PASS — P16 ran in the same grounded-planning thread and
+  identified unapproved scope, deletion, ordering, whitespace, response-shape,
+  and UI choices**.
+- Manual repository verification: **PASS — cited model, route, storage,
+  fixture, frontend, README, ADR, Python-version, and no-seed claims were
+  checked against the current branch**.
+- Path conflict resolution: **PASS — `Docs/decisions/` contained no file on
+  this branch before the final plan was added; the IDE's Module 4 tab was not
+  treated as branch evidence**.
+- Student-approved section grades: Data Model Right; API Routes Missing; Tests
+  Needs-Resequencing; Frontend Changes Right; Migration Notes Right; Open
+  Questions Right; Suggested Implementation Order Right.
+- Minimal corrections: **PASS — unratified choices are labeled as proposals,
+  decision-dependent tests follow contract ratification, server-owned-field
+  cases are separated/parameterized, and transactional deletion wording was
+  removed**.
+- Comparison: **PASS — exactly three lines cover the biggest difference, the
+  teammate handoff choice, and a task appropriate for generic chat**.
+- Open questions: **PASS — eight real product/architecture decisions remain
+  visible**.
+- Non-implementation: **PASS — no model, route, storage, test, frontend,
+  migration, dependency, or configuration change was made**.
+- Browser verification: **NOT RUN — planning-only documentation**.
+- Test suite: **NOT RUN — documentation-only change**.
+- Commit status: **Not committed; review and explicit commit approval are
+  required**.
 
 ## Part 5.5 — Context engineering
 
