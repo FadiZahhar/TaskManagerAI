@@ -236,3 +236,21 @@ suggestion, splitting `requirements.txt` into separate runtime/dev files to slim
 the Docker image, was downgraded to a documented backlog item rather than
 applied, to keep the release change minimal; the owner-confirmed grade is in
 `Docs/final-ai-review.md`.
+
+## GitHub Pages Learning Hub
+
+This branch also includes a static AI-Assisted Coding Learning Hub at the
+repository root. It is separate from the Task Tracker app in `app/` and
+`frontend/`.
+
+Preview it locally from the repository root:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open <http://localhost:8000/>. The site uses only relative links, static
+HTML/CSS/JavaScript, `.nojekyll`, and browser-local progress storage, so it can
+be published from a GitHub Pages branch root. Do not store secrets, tokens,
+student records, customer data, or other sensitive information in the local
+progress tools.

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI-Assisted Coding Learning Hub</title>
+  <meta name="description" content="A friendly static learning hub for responsible AI-assisted coding with Task Tracker examples.">
+  <link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <script src="./assets/js/site-content.js" defer></script>
+  <script src="./assets/js/quiz-bank.js" defer></script>
+  <script src="./assets/js/storage.js" defer></script>
+  <script src="./assets/js/common.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="./index.html"><span class="brand-mark" aria-hidden="true">AI</span><span>Learning Hub</span></a>
+      <button class="menu-toggle secondary" type="button" data-menu-toggle aria-controls="site-navigation" aria-expanded="false">Menu</button>
+      <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
+        <a href="./index.html">Home</a>
+        <a href="./index.html#modules">Modules</a>
+        <a href="./quiz.html">Quiz Lab</a>
+        <a href="./progress.html">My Progress</a>
+        <a href="./glossary.html">Glossary</a>
+        <a href="./sources.html">Sources</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="page-shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">GitHub Pages course site</p>
+        <h1>Learn to use AI as a coding partner, not an autopilot.</h1>
+        <p class="lead">Explore five short modules about prompting, backend work, frontend work, agent control, and responsible AI governance. The examples stay grounded in the Task Tracker project.</p>
+        <div class="footer-actions">
+          <a class="button" href="./module-1.html">Start Module 1</a>
+          <a class="button secondary" href="./quiz.html">Open Quiz Lab</a>
+          <a class="button secondary" data-continue-link href="./module-1.html">Continue last visit</a>
+        </div>
+      </div>
+      <aside class="hero-card" aria-labelledby="progress-heading">
+        <h2 id="progress-heading">Your local progress</h2>
+        <p data-progress-summary>Progress loads when JavaScript is available.</p>
+        <p class="status-line">Progress stays in this browser unless you export it. Do not save secrets or personal data.</p>
+      </aside>
+    </section>
+
+    <noscript>
+      <div class="noscript">
+        JavaScript is off. You can still read this page and open the module pages, but quizzes, progress, theme switching, import, and export need JavaScript.
+      </div>
+    </noscript>
+
+    <section id="modules" class="section">
+      <h2>The five-module journey</h2>
+      <ol class="journey-map" data-journey-map>
+        <li><strong>Module 1: Communicate</strong><p>Give AI a clear task, context, limits, and output format.</p><a href="./module-1.html">Open module</a></li>
+        <li><strong>Module 2: Build</strong><p>Create a verified FastAPI backend with strict models, routes, rules, and tests.</p><a href="./module-2.html">Open module</a></li>
+        <li><strong>Module 3: Refine</strong><p>Build the browser experience with focused prompts, Fetch, drag and drop, and tests.</p><a href="./module-3.html">Open module</a></li>
+        <li><strong>Module 4: Control</strong><p>Use a repository-wide agent carefully for Docker, CI, documentation, and review.</p><a href="./module-4.html">Open module</a></li>
+        <li><strong>Module 5: Govern</strong><p>Judge findings, protect information, engineer context, and document AI use.</p><a href="./module-5.html">Open module</a></li>
+      </ol>
+    </section>
+
+    <section class="section grid three" aria-label="How this site works">
+      <article class="card">
+        <h2>1. Read a small idea</h2>
+        <p>Each module uses short explanations and Task Tracker examples instead of long walls of text.</p>
+      </article>
+      <article class="card">
+        <h2>2. Try an activity</h2>
+        <p>Practice with a prompt builder, API detective, fetch bug hunt, diff triage, and security finding sorter.</p>
+      </article>
+      <article class="card">
+        <h2>3. Check understanding</h2>
+        <p>Use quick checks or the Quiz Lab. Low scores are just signals for what to review next.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-shell">
+      <div>
+        <strong>Privacy note:</strong> local progress stays in this browser. Do not enter secrets, tokens, real student records, or customer data.
+        <div data-storage-status class="feedback" role="status" aria-live="polite"></div>
+      </div>
+      <div class="footer-actions">
+        <label for="theme-select"><span>Theme</span><select id="theme-select" data-theme-select><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+        <button type="button" class="secondary" data-action="export-progress">Export JSON</button>
+        <label class="button secondary" for="import-progress">Import JSON</label>
+        <input class="visually-hidden" id="import-progress" type="file" accept="application/json" data-import-progress>
+        <button type="button" class="danger" data-action="reset-progress">Reset</button>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Module 1 - Talk to AI Clearly</title>
+  <link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <script src="./assets/js/site-content.js" defer></script>
+  <script src="./assets/js/quiz-bank.js" defer></script>
+  <script src="./assets/js/storage.js" defer></script>
+  <script src="./assets/js/common.js" defer></script>
+  <script src="./assets/js/module-page.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="./index.html"><span class="brand-mark" aria-hidden="true">AI</span><span>Learning Hub</span></a>
+      <button class="menu-toggle secondary" type="button" data-menu-toggle aria-controls="site-navigation" aria-expanded="false">Menu</button>
+      <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
+        <a href="./index.html">Home</a><a href="./index.html#modules">Modules</a><a href="./quiz.html">Quiz Lab</a><a href="./progress.html">My Progress</a><a href="./glossary.html">Glossary</a><a href="./sources.html">Sources</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page-shell" data-module-id="1">
+    <p class="breadcrumb"><a href="./index.html">Home</a> / Module 1</p>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Module 1</p>
+        <h1>Talk to AI Clearly</h1>
+        <p class="lead" data-module-mission>Give an AI tool a clear job, review its draft, and turn ideas into useful project documents.</p>
+      </div>
+      <aside class="hero-card">
+        <h2>Task Tracker example</h2>
+        <p data-module-analogy>AI is like a new intern: fast and helpful, but it needs a clear brief and careful review.</p>
+        <button type="button" data-bookmark-page>Bookmark this module</button>
+      </aside>
+    </section>
+    <noscript><div class="noscript">Module 1 teaches task, context, constraints, output format, user stories, acceptance criteria, ADRs, and human review of AI drafts.</div></noscript>
+    <section class="section grid two">
+      <article class="panel"><h2>In simple English</h2><ul class="content-list" data-simple-overview><li>A strong prompt explains the job, context, limits, and expected output.</li></ul></article>
+      <article class="panel"><h2>Common mistakes</h2><ul class="content-list" data-common-mistakes><li>Using a vague prompt and accepting the first answer.</li></ul></article>
+    </section>
+    <section class="section panel"><h2>Interactive mini activity</h2><div data-activity></div></section>
+    <section class="section panel"><h2>Five-question quick check</h2><div data-quick-check></div></section>
+    <section class="section panel"><h2>Reading map</h2><div data-reading-map></div></section>
+    <section class="section callout"><h2>One thing to remember</h2><p data-key-takeaway>Clear context and clear limits produce more useful drafts, but the human still owns the result.</p><button type="button" data-reading-complete>Mark reading complete</button></section>
+    <section class="section panel"><h2>Reflection</h2><label for="reflection">One sentence you want to remember<textarea id="reflection" data-reflection-input maxlength="400"></textarea></label><button type="button" data-reflection-save>Save reflection</button></section>
+    <nav class="module-nav" aria-label="Module navigation"><a class="button secondary" href="./index.html">Back home</a><a class="button" href="./module-2.html">Next: Module 2</a></nav>
+  </main>
+  <footer class="site-footer"><div class="footer-shell"><div><strong>Privacy note:</strong> local progress stays in this browser.<div data-storage-status class="feedback" role="status" aria-live="polite"></div></div><div class="footer-actions"><label for="theme-select"><span>Theme</span><select id="theme-select" data-theme-select><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label><button type="button" class="secondary" data-action="export-progress">Export JSON</button><label class="button secondary" for="import-progress">Import JSON</label><input class="visually-hidden" id="import-progress" type="file" accept="application/json" data-import-progress><button type="button" class="danger" data-action="reset-progress">Reset</button></div></div></footer>
+</body>
+</html>
