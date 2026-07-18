@@ -9,8 +9,8 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Source branch: `module-5-governance`
 - Source commit: `46b62cd1ad945640b26c53fcf99cf8275deca7de`
 - Final branch: `final-project`
-- Verified release-candidate commit: recorded in the "Final release result"
-  section after the release commits are pushed and CI is observed.
+- Verified release-candidate commit: `7065c9188a3f40515a6b4ee416aab0af08298025`
+  (CI green — 60 passed)
 - Verification date: 2026-07-18
 
 ## Scope control
@@ -80,10 +80,15 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Shortcut scan: **Clean** — no `continue-on-error`, `|| true`, `--exit-zero`,
   skipped/commented pytest, or zero-test success; least-privilege
   `permissions: contents: read` and a 10-minute timeout are set.
-- Latest run result: recorded in "Final release result" after the branch is
-  pushed and the run is observed with `gh`.
-- Latest run link or note: recorded in "Final release result".
-- Verified commit: recorded in "Final release result".
+- Latest run result: **PASS (success)** — `60 passed, 3 warnings` on GitHub
+  Actions (ubuntu-latest, Python 3.9); every step (checkout, setup-python,
+  install dependencies, Run tests) succeeded. Confirmed the suite collected and
+  ran 60 tests (not a zero-test success).
+- Latest run link: <https://github.com/FadiZahhar/TaskManagerAI/actions/runs/29623937262> (run id 29623937262)
+- Verified commit: `7065c9188a3f40515a6b4ee416aab0af08298025`
+- Note: the follow-up commit that records this CI evidence is documentation-only
+  and does not change the test surface; the release-candidate commit above is
+  the code/infra commit CI validated green.
 
 ## Docker evidence
 
@@ -135,7 +140,7 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Backend health: **PASS** (HTTP 200)
 - Frontend automated check: **PASS** (static/DOM markers)
 - Frontend owner visual check: **NEEDS OWNER VALIDATION**
-- CI: recorded here after push (`gh run` observation)
+- CI: **PASS (green)** — run 29623937262, 60 passed (GitHub Actions, Python 3.9)
 - Docker build: **PASS**
 - Docker health: **PASS** (HTTP 200, non-root)
 - Repository hygiene: **PASS (clean)**
@@ -143,5 +148,5 @@ observed on the operator's machine; results are summarized, not fabricated.
   persistent database (in-memory, reset on restart), no pagination/resource
   bounds, single process; `pip-audit`/CVE scan not run; visual browser check
   pending owner confirmation.
-- Verified release-candidate commit: recorded here after push.
+- Verified release-candidate commit: `7065c9188a3f40515a6b4ee416aab0af08298025`
 - Technical status: **READY FOR OWNER VALIDATION**
