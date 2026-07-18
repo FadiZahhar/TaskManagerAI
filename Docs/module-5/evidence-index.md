@@ -77,6 +77,14 @@ of completion.
   the final Phase 4 document was written, local HEAD and
   `origin/module-5-governance` were synchronized at that commit (`0` ahead,
   `0` behind).
+- The final comments-feature plan and its evidence update were checkpointed in
+  `46b62cd1ad945640b26c53fcf99cf8275deca7de` (`comments features`).
+- Architecture A and B were checkpointed in
+  `11665571148d03458f48f53bff1ba79b0b5cbdd6` (`Adding Architecture A and B`),
+  and Architecture C was checkpointed separately in
+  `0f94c6b1530e5fa84085b6017c65b0f292604e2c` (`adding this`). Local HEAD and
+  `origin/module-5-governance` were synchronized at the latter commit when the
+  final architecture document was assembled.
 
 ## Part 5.1 — Setup and grounding
 
@@ -197,23 +205,96 @@ of completion.
   migration, dependency, or configuration change was made**.
 - Browser verification: **NOT RUN — planning-only documentation**.
 - Test suite: **NOT RUN — documentation-only change**.
-- Commit status: **Not committed; review and explicit commit approval are
-  required**.
+- Checkpoint: commit `46b62cd1ad945640b26c53fcf99cf8275deca7de`,
+  synchronized with `origin/module-5-governance` before Phase 5 completion.
 
 ## Part 5.5 — Context engineering
 
-- Status: **Not started**
-- Planned artifacts: `Docs/architecture-A.md`, `Docs/architecture-B.md`,
-  `Docs/architecture-C.md`, and `Docs/architecture.md`.
+- Status: **PASS with one student confirmation remaining — documentation
+  completed 2026-07-18**.
+- Preserved drafts: `Docs/architecture-A.md`, `Docs/architecture-B.md`, and
+  `Docs/architecture-C.md`.
+- Final artifact: `Docs/architecture.md`.
+- Approved scorecard: **PASS — the student graded correctness, specificity,
+  completeness, unsupported claims, uncertainty, concision, task fit, and each
+  strategy's most important miss**.
+- Student-selected baseline: **Strategy A — approved because it is the most
+  complete, directly cited whole-system draft**.
+- Final corrections: **PASS — the stale Module 1 metadata conflict identified
+  by Strategy C is included, and Strategy A's concurrency statement is labeled
+  as an architectural inference rather than an observed runtime failure**.
+- Context comparison: **PASS — A, B, and C are compared by strengths, misses,
+  uncertainty, and best task shape**.
+- Student-approved context rule: **PASS — Strategy A is used for broad
+  architecture summaries with repository inspection; Strategy C is used for
+  bounded backend reviews with tightly controlled context**.
+- Draft runtime/browser verification: **NOT RUN for A, B, and C**.
+- Full test suite after final architecture assembly: **PASS — 60 passed with
+  four warnings via `.venv/bin/python -m pytest` on 2026-07-18**.
+- Application changes: **PASS — none made for this phase**.
+- Fresh-thread evidence: **Student confirmation required — the supplied
+  context describes three context strategies and a clean rerun of C, but the
+  repository cannot independently prove that A and B were created in genuinely
+  fresh threads**.
+- Draft checkpoints: **A and B are preserved in `1166557`; C is preserved in
+  the separate `0f94c6b` checkpoint**.
+- Commit status: **Not committed; explicit commit approval is still required**.
 
 ## Part 5.6 — Personal AI coding playbook
 
-- Status: **Not started**
-- Planned artifact: `Docs/ai-playbook.md`.
+- Status: **Needs student-authored decisions — not complete**.
+- Required artifact: `Docs/ai-playbook.md` is not present.
+- Existing student-approved evidence available for reuse: the three concrete
+  rules in `Docs/governance-worksheet.md:122-128`, the ownership conclusion at
+  `Docs/governance-worksheet.md:115-120`, the security-review observation at
+  `Docs/security-review.md:49-54`, and the context-engineering rule in
+  `Docs/architecture.md`.
+- Decision Card: **Not completed — the student must choose tools for a new
+  feature, code review, debugging, and infrastructure, plus the never-paste
+  category and strongest rule**.
+- Student voice: **Cannot be graded because no student-written playbook draft
+  exists**.
+- Codex review: **NOT RUN — review requires the student's draft first**.
+- Recommended reread date if the playbook is completed on 2026-07-18:
+  **2026-08-17**.
+- Application and test edits: **None**.
+
+## Final deliverable matrix
+
+| Part | Artifact | Human-owned evidence | Status | Remaining action |
+|---|---|---|---|---|
+| 5.1 | `AGENTS.md`; `Docs/module-5/setup-smoke-tests.md` | Repository rules, verified commands, business contract, and smoke-test evidence | **Complete** | None |
+| 5.2 | `Docs/security-review.md` | Student grades, manual scan, reconciliation, and ranked backlog | **Complete** | None; optional fix remains deliberately backlogged |
+| 5.3 | `Docs/governance-worksheet.md` | Risk classifications, code ownership answers, reflection, and three approved rules | **Complete** | None |
+| 5.4 | `Docs/decisions/comments-feature-plan.md` | Section grades, grounded corrections, generic-plan comparison, and open decisions | **Complete** | Do not implement comments in Module 5 |
+| 5.5 | `Docs/architecture-A.md`, `Docs/architecture-B.md`, `Docs/architecture-C.md`, `Docs/architecture.md` | Approved scorecard, Strategy A verdict, corrections, and context rule | **Documentation complete; confirmation needed** | Student confirms A and B were created in genuinely fresh threads |
+| 5.6 | `Docs/ai-playbook.md` | Student voice, Decision Card, strongest rule, and reread commitment | **Not complete — artifact missing** | Student writes the playbook and answers all six Decision Card prompts |
 
 ## Final verification
 
-- Status: **Not started**
-- Phase 0 unexpected application edits: **None observed**
-- Phase 0 browser verification: **NOT RUN — not required for the baseline**
-- Final commit: **Not created; commits require explicit approval after review**
+- Status: **Needs student action — audit completed 2026-07-18, submission not
+  ready**.
+- Core artifact inventory: **9 of 10 present; `Docs/ai-playbook.md` is missing**.
+- Placeholder scan: **PASS for all available core artifacts — no unresolved
+  placeholder pattern matched**.
+- Suspicious tracked filename scan: **PASS — no common `.env`, secret,
+  credential, token, private-key, PEM, or key filename matched; Git history and
+  external systems were not scanned**.
+- Unexpected application changes: **PASS — no baseline-to-HEAD changes under
+  `app/`, `tests/`, `frontend/`, `requirements.txt`, or `pytest.ini`; current
+  uncommitted changes are documentation only**.
+- Test suite: **PASS — 60 passed with four warnings via
+  `.venv/bin/python -m pytest` on Python 3.14.2**.
+- Browser verification: **NOT RUN — no application behavior was changed in the
+  remaining documentation work**.
+- Diff whitespace check: **PASS — `git diff --check` and the no-index check for
+  the new architecture file produced no whitespace errors**.
+- Branch synchronization before remaining writes: **PASS — HEAD and
+  `origin/module-5-governance` were both at `0f94c6b`**.
+- Remaining human decisions: **confirm fresh-thread separation for A and B;
+  write the personal playbook in the student's voice; complete the Decision
+  Card; decide final readiness after reviewing the final diff**.
+- Uncommitted files: `Docs/architecture.md` and
+  `Docs/module-5/evidence-index.md`.
+- Final commit: **Not created; explicit approval after diff and verification
+  review is required**.
