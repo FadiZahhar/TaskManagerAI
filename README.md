@@ -27,13 +27,13 @@ pytest                                                         # full suite (60 
 pytest tests/test_due_dates.py tests/test_search_filters.py    # the new feature tests
 ```
 
-The human-owned, AI-assisted workflow evidence lives in `docs/midcourse/`:
+The human-owned, AI-assisted workflow evidence lives in `Docs/midcourse/`:
 
-- User stories & acceptance criteria — `docs/midcourse/user-stories.md`
-- Decision record (ADRs) — `docs/midcourse/mini-adr.md`
-- AI prompt & decision log — `docs/midcourse/prompt-log.md`
-- Verification & Break Test evidence — `docs/midcourse/verification.md`
-- Reflection — `docs/midcourse/reflection.md`
+- User stories & acceptance criteria — `Docs/midcourse/user-stories.md`
+- Decision record (ADRs) — `Docs/midcourse/mini-adr.md`
+- AI prompt & decision log — `Docs/midcourse/prompt-log.md`
+- Verification & Break Test evidence — `Docs/midcourse/verification.md`
+- Reflection — `Docs/midcourse/reflection.md`
 
 ## Project structure
 
@@ -108,7 +108,7 @@ pytest
 ```
 60 tests covering health, full task CRUD, validation, the status-transition
 matrix, due dates + overdue filtering, and search + combined filters (several
-proven via deliberate source breakage — see `docs/midcourse/verification.md`
+proven via deliberate source breakage — see `Docs/midcourse/verification.md`
 §6–7 and `Docs/Module3/debugging-log.md`).
 
 ## Verify
@@ -152,7 +152,87 @@ testing.
 ## Known limitations
 
 No authentication, no persistent database (all data is in-memory and reset
-on restart), no pagination, no Docker/deployment configuration, single
-process only. These are explicitly out of scope for this course project;
-see `Docs/adr-0001-stack.md` for the reasoning and the risk this carries as
-the project grows.
+on restart), no pagination, and no production deployment/hosting, single
+process only. (A local Docker image build and a CI test workflow are provided
+for the final project — see [Final Project](#final-project) — but nothing is
+deployed.) These limitations are explicitly out of scope for this course
+project; see `Docs/adr-0001-stack.md` for the reasoning and the risk this
+carries as the project grows.
+
+## Final Project
+
+Branch reviewed: `final-project`
+
+### What this submission demonstrates
+
+- The existing Task Tracker still runs within the intended course scope — no new
+  product features were added (no comments, authentication, database, or
+  notifications).
+- CI runs the full pytest suite (60 tests) on push and pull request
+  (`.github/workflows/ci.yml`).
+- The Docker image builds and runs as a non-root user, with `/health` returning
+  HTTP 200 (`Dockerfile`, `.dockerignore`).
+- AI review, security, verification, and ownership evidence lives in `Docs/`.
+
+### Prerequisites
+
+- Python 3.9+ (verified on 3.9.6). Avoid `X | None` union syntax in new code;
+  use `typing.Optional[X]`.
+- Docker (only for the container build/run steps).
+
+### How to run locally
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# Terminal 1 — backend  → http://127.0.0.1:8000
+uvicorn app.main:app --reload
+
+# Terminal 2 — frontend → http://127.0.0.1:5500
+python3 -m http.server 5500 --directory frontend
+```
+
+Open <http://127.0.0.1:5500>. CORS allows only `http://127.0.0.1:5500` and
+`http://localhost:5500`.
+
+### How to run tests
+
+```bash
+pytest                               # full suite (60 tests)
+# venv not activated? use:  .venv/bin/python -m pytest
+```
+
+### How to run with Docker
+
+```bash
+docker build -t task-tracker:final .
+docker run -d --name task-tracker-final -p 8000:8000 task-tracker:final
+curl -i http://127.0.0.1:8000/health     # → HTTP 200 {"status":"ok","timestamp":"..."}
+docker logs task-tracker-final           # startup logs
+docker rm -f task-tracker-final          # stop + remove
+```
+
+The container runs the API only (uvicorn on `0.0.0.0:8000`, no `--reload`,
+non-root user `app`). The frontend is served separately as static files.
+
+### Evidence files
+
+- `Docs/release-evidence.md` — release identity, baseline, and test / CI /
+  Docker / hygiene evidence.
+- `Docs/final-ai-review.md` — AGENTS.md guardrail check, AI code-review and
+  security mini-logs with owner grades, and the ownership statement.
+- `Docs/ai-playbook.md` — the owner's one-page personal AI-coding playbook.
+
+### AI assistance summary
+
+AI (Claude Code) drafted the CI workflow, the `Dockerfile`/`.dockerignore`, the
+release and AI-review evidence documents, and this README section, and performed
+read-only code- and security-review passes over the actual `final-project` diff
+and the application. Every command reported here — full tests, backend `/health`,
+and Docker build/run/health — was run and observed, not assumed. One AI
+suggestion, splitting `requirements.txt` into separate runtime/dev files to slim
+the Docker image, was downgraded to a documented backlog item rather than
+applied, to keep the release change minimal; the owner-confirmed grade is in
+`Docs/final-ai-review.md`.
