@@ -1,9 +1,9 @@
 # My AI Coding Playbook
 
 One page, first person. It reuses the rules and evidence I confirmed in
-`Docs/governance-worksheet.md` and extends them for the final project. Wording
-carried over from that student-approved worksheet is mine already; newly drafted
-sentences are flagged for confirmation in the Owner Validation Packet.
+`Docs/governance-worksheet.md` and extends them for the final project. I
+reviewed and approved this wording, including the newly drafted first-person
+sentences, on 2026-07-18.
 
 ## When I reach for AI first
 
@@ -78,6 +78,6 @@ sentences are flagged for confirmation in the Owner Validation Packet.
 | **New feature** | AI drafts from a bounded requirement; I own scope and business rules, and reject out-of-scope additions. Nothing merges without my read + tests. |
 | **Code review** | AI does one correctness pass and one maintainability pass; I confirm or overturn each comment against the real diff before it counts. |
 | **Debugging** | Share the failing test/handler, the exact error, and a minimal reproduction — not the whole repository. Verify the fix with the smallest test, then the full suite. |
-| **Infrastructure (CI/Docker)** | AI drafts; I verify versions are consistent (Python 3.9 across README, Dockerfile, CI), the container runs non-root with no `--reload`, and CI actually runs the real suite (no `|| true` / `--exit-zero`). |
+| **Infrastructure (CI/Docker)** | AI drafts; I verify versions are consistent (Python 3.9 across README, Dockerfile, CI), the container runs non-root with no `--reload`, and CI actually runs the real suite with no failure-masking (`--exit-zero`, `continue-on-error`). |
 | **Never paste** | Credentials, tokens, private keys, `.env` files, production config, or real personal/customer data. Describe the category; never copy the value. |
 | **One governing rule** | AI proposes; I verify and own. If I cannot explain a line or point to its evidence, it does not ship. |

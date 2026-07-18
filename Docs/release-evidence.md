@@ -53,10 +53,12 @@ observed on the operator's machine; results are summarized, not fabricated.
   contains the three status columns (`data-status="ToDo|InProgress|Done"`),
   `#new-task-btn`, `#task-modal`, `#filter-search`, and
   `API_BASE = "http://127.0.0.1:8000"`.
-- Visual owner check: **NEEDS OWNER VALIDATION** — no browser automation is
-  installed (playwright/chromium absent); the interactive Kanban render,
-  create/edit modal, and drag-and-drop must be confirmed manually by the owner.
-- Result: **PASS (automated/static)**, visual **NEEDS OWNER VALIDATION**
+- Visual owner check: **PASS (owner-confirmed 2026-07-18)** — the owner opened
+  <http://127.0.0.1:5500> and confirmed the three columns render, "New Task"
+  creates a task, edit and delete-with-confirm work, and cards drag between
+  columns. (No browser automation is installed; this is the owner's own
+  observation.)
+- Result: **PASS** (automated/static + owner visual)
 
 ## Final test verification
 
@@ -139,14 +141,18 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Local tests: **PASS** (60 passed, Python 3.9.6)
 - Backend health: **PASS** (HTTP 200)
 - Frontend automated check: **PASS** (static/DOM markers)
-- Frontend owner visual check: **NEEDS OWNER VALIDATION**
+- Frontend owner visual check: **PASS** (owner-confirmed 2026-07-18 — board
+  renders; create/edit/drag/delete work)
 - CI: **PASS (green)** — run 29623937262, 60 passed (GitHub Actions, Python 3.9)
 - Docker build: **PASS**
 - Docker health: **PASS** (HTTP 200, non-root)
 - Repository hygiene: **PASS (clean)**
 - Remaining known limitations (documented course scope): no authentication, no
   persistent database (in-memory, reset on restart), no pagination/resource
-  bounds, single process; `pip-audit`/CVE scan not run; visual browser check
-  pending owner confirmation.
+  bounds, single process; `pip-audit`/CVE scan not run. Security findings S1–S4
+  are owned, documented backlog items (see `Docs/final-ai-review.md`).
+- Owner validation: **complete (2026-07-18)** — frontend visual PASS, public
+  repository/branch confirmed, all AI code-review and security grades confirmed,
+  ownership statement approved.
 - Verified release-candidate commit: `7065c9188a3f40515a6b4ee416aab0af08298025`
-- Technical status: **READY FOR OWNER VALIDATION**
+- Technical status: **READY FOR SUBMISSION**
