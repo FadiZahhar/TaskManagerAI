@@ -764,6 +764,25 @@
       return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
     }
 
+    // FastAPI returns business errors (404, invalid transition) with a string
+    // `detail`, but request-validation errors (422) with `detail` as an ARRAY
+    // of {loc, msg} objects. Normalize both into a readable message instead of
+    // silently falling back to a generic "Request failed…" (finding S4).
+    function errorDetail(body, status) {
+      const detail = body && body.detail;
+      if (typeof detail === "string") return detail;
+      if (Array.isArray(detail)) {
+        const parts = detail
+          .map((item) => {
+            const field = Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : null;
+            return field && field !== "body" ? `${field}: ${item.msg}` : item.msg;
+          })
+          .filter(Boolean);
+        if (parts.length) return parts.join("; ");
+      }
+      return `Request failed with status ${status}`;
+    }
+
     const banner = document.getElementById("board-banner");
     const overdueFilter = document.getElementById("overdue-filter");
     const filterSearch = document.getElementById("filter-search");
@@ -997,7 +1016,7 @@
         });
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
-          dragError = typeof body.detail === "string" ? body.detail : `Request failed with status ${response.status}`;
+          dragError = errorDetail(body, response.status);
         }
       } catch (error) {
         dragError = error.message;
@@ -1022,7 +1041,7 @@
         const response = await fetch(`${API_BASE}/tasks/${taskId}`, { method: "DELETE" });
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
-          deleteError = typeof body.detail === "string" ? body.detail : `Request failed with status ${response.status}`;
+          deleteError = errorDetail(body, response.status);
         }
       } catch (error) {
         deleteError = error.message;
@@ -1186,8 +1205,7 @@
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
-        modalError.textContent =
-          typeof body.detail === "string" ? body.detail : `Request failed with status ${response.status}`;
+        modalError.textContent = errorDetail(body, response.status);
         return; // keep modal open, values intact, per the 422 contract
       }
 
