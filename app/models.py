@@ -4,7 +4,20 @@ from datetime import date, datetime, timezone
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, computed_field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    computed_field,
+    field_validator,
+    model_validator,
+)
+
+# Field length bounds. `title` keeps its original 200-char cap; `description`
+# and `assignee` were previously unbounded (security finding S3).
+TITLE_MAX_LENGTH = 200
+DESCRIPTION_MAX_LENGTH = 2000
+ASSIGNEE_MAX_LENGTH = 100
 
 
 class TaskStatus(str, Enum):
@@ -34,10 +47,10 @@ class TaskCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     title: str
-    description: Optional[str] = ""
+    description: Optional[str] = Field(default="", max_length=DESCRIPTION_MAX_LENGTH)
     status: TaskStatus = TaskStatus.TODO
     priority: TaskPriority = TaskPriority.MEDIUM
-    assignee: Optional[str] = None
+    assignee: Optional[str] = Field(default=None, max_length=ASSIGNEE_MAX_LENGTH)
     due_date: Optional[date] = None
 
     @field_validator("title")
@@ -46,8 +59,8 @@ class TaskCreate(BaseModel):
         stripped = value.strip()
         if not stripped:
             raise ValueError("title must not be blank")
-        if len(stripped) > 200:
-            raise ValueError("title must be 200 characters or fewer")
+        if len(stripped) > TITLE_MAX_LENGTH:
+            raise ValueError(f"title must be {TITLE_MAX_LENGTH} characters or fewer")
         return stripped
 
 
@@ -55,11 +68,31 @@ class TaskUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     title: Optional[str] = None
-    description: Optional[str] = None
+    description: Optional[str] = Field(default=None, max_length=DESCRIPTION_MAX_LENGTH)
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
-    assignee: Optional[str] = None
+    assignee: Optional[str] = Field(default=None, max_length=ASSIGNEE_MAX_LENGTH)
     due_date: Optional[date] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _reject_explicit_null(cls, data: object) -> object:
+        # An explicit JSON null for a non-nullable field would otherwise be
+        # written into storage without re-validation and corrupt the task —
+        # turning a later list/search/transition into a 500 (findings S1/S2).
+        # Reject it with a 422. `assignee` and `due_date` stay nullable, so an
+        # explicit null still clears them.
+        if isinstance(data, dict):
+            nulled = [
+                field
+                for field in ("title", "description", "status", "priority")
+                if field in data and data[field] is None
+            ]
+            if nulled:
+                raise ValueError(
+                    "these fields may not be null: " + ", ".join(sorted(nulled))
+                )
+        return data
 
     @field_validator("title")
     @classmethod
@@ -69,8 +102,8 @@ class TaskUpdate(BaseModel):
         stripped = value.strip()
         if not stripped:
             raise ValueError("title must not be blank")
-        if len(stripped) > 200:
-            raise ValueError("title must be 200 characters or fewer")
+        if len(stripped) > TITLE_MAX_LENGTH:
+            raise ValueError(f"title must be {TITLE_MAX_LENGTH} characters or fewer")
         return stripped
 
 
