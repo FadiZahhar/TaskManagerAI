@@ -9,9 +9,10 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Source branch: `module-5-governance`
 - Source commit: `46b62cd1ad945640b26c53fcf99cf8275deca7de`
 - Final branch: `final-project`
-- Verified release-candidate commit: `7065c9188a3f40515a6b4ee416aab0af08298025`
-  (CI green — 60 passed)
+- Verified final-project commit: `b98b5f5bc2bb4b7957e679f832367ec97ada3da5`
+  (CI run 29638641102 green — 60 passed)
 - Verification date: 2026-07-18
+- Feedback-response documentation update: 2026-07-20
 
 ## Scope control
 
@@ -86,11 +87,11 @@ observed on the operator's machine; results are summarized, not fabricated.
   Actions (ubuntu-latest, Python 3.9); every step (checkout, setup-python,
   install dependencies, Run tests) succeeded. Confirmed the suite collected and
   ran 60 tests (not a zero-test success).
-- Latest run link: <https://github.com/FadiZahhar/TaskManagerAI/actions/runs/29623937262> (run id 29623937262)
-- Verified commit: `7065c9188a3f40515a6b4ee416aab0af08298025`
-- Note: the follow-up commit that records this CI evidence is documentation-only
-  and does not change the test surface; the release-candidate commit above is
-  the code/infra commit CI validated green.
+- Latest run link: <https://github.com/FadiZahhar/TaskManagerAI/actions/runs/29638641102> (run id 29638641102)
+- Verified commit: `b98b5f5bc2bb4b7957e679f832367ec97ada3da5`
+- Run/commit match: **Yes** — GitHub Actions reports head SHA
+  `b98b5f5bc2bb4b7957e679f832367ec97ada3da5` for run 29638641102. Do not submit
+  a later commit until the CI run for that later SHA is checked and recorded.
 
 ## Docker evidence
 
@@ -132,9 +133,13 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Credentials/private keys tracked: **No**
 - Production logs tracked: **No**
 - Personal/customer data found: **No**
-- Remaining blocker: **None**
-- Note: `CLAUDE_FINAL_PROJECT_AUTOPILOT.md` is untracked operator input and is
-  intentionally not committed (per its own instructions); it contains no secrets.
+- Remaining blocker: **Known explicit-`null` update defects remain unfixed** —
+  `PATCH` requests that send `null` for required fields can corrupt in-memory
+  task data and bypass the status-transition guard. These are the owner-confirmed
+  S1/S2 findings in `Docs/final-ai-review.md`; they were documented as backlog
+  items and were **not** fixed or regression-tested in this release.
+- Temporary operator prompt file: **Absent** — `CLAUDE_FINAL_PROJECT_AUTOPILOT.md`
+  is not present in the working tree and is not part of the release.
 
 ## Final release result
 
@@ -143,16 +148,21 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Frontend automated check: **PASS** (static/DOM markers)
 - Frontend owner visual check: **PASS** (owner-confirmed 2026-07-18 — board
   renders; create/edit/drag/delete work)
-- CI: **PASS (green)** — run 29623937262, 60 passed (GitHub Actions, Python 3.9)
+- CI: **PASS (green)** — run 29638641102 for commit
+  `b98b5f5bc2bb4b7957e679f832367ec97ada3da5`, 60 passed (GitHub Actions,
+  Python 3.9)
 - Docker build: **PASS**
 - Docker health: **PASS** (HTTP 200, non-root)
 - Repository hygiene: **PASS (clean)**
-- Remaining known limitations (documented course scope): no authentication, no
-  persistent database (in-memory, reset on restart), no pagination/resource
-  bounds, single process; `pip-audit`/CVE scan not run. Security findings S1–S4
-  are owned, documented backlog items (see `Docs/final-ai-review.md`).
+- Remaining known limitations and defects: no authentication, no persistent
+  database (in-memory, reset on restart), no pagination/resource bounds, single
+  process; `pip-audit`/CVE scan not run. Security findings S1–S4 are owned,
+  documented backlog items; S1/S2 explicit-`null` defects remain valid blockers
+  unless fixed and tested later (see `Docs/final-ai-review.md`).
 - Owner validation: **complete (2026-07-18)** — frontend visual PASS, public
   repository/branch confirmed, all AI code-review and security grades confirmed,
   ownership statement approved.
-- Verified release-candidate commit: `7065c9188a3f40515a6b4ee416aab0af08298025`
-- Technical status: **READY FOR SUBMISSION**
+- Verified final-project commit: `b98b5f5bc2bb4b7957e679f832367ec97ada3da5`
+- Technical status: **SUBMISSION PACKAGE UPDATED; KNOWN NULL-VALUE BLOCKER
+  REMAINS** — not a defect-free release; the explicit-`null` blocker remains
+  unless a later fix is implemented and tested.
