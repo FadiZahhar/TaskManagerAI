@@ -53,8 +53,8 @@ student-graded `Docs/security-review.md`. Owner grades confirmed 2026-07-18.
 
 | ID | Finding | File/location | Evidence checked | AI-recommended grade | Owner grade | Owner reason | Disposition |
 |---|---|---|---|---|---|---|---|
-| S1 | Explicit-`null` partial update corrupts required fields. `TaskUpdate` fields are `Optional`; `model_dump(exclude_unset=True)` keeps an explicit `null` as "set"; `model_copy(update=…)` writes `None` into non-optional `TaskResponse` fields with no revalidation. | `app/storage.py:63–73`; `app/main.py:70–81`; `app/models.py:54–88` | Reproduced end-to-end: `PATCH {"title":null}` → **200** with `title=null`, then `GET /tasks?search=…` → **500**; poisons the process-global store until restart. | **Valid** — High | **Valid** — High | Reproduced live during owner validation (200 then 500). | Bounded fix available (reject `null` on non-nullable fields, or revalidate the merged model). **Backlog** — consistent with the Module 5 decision in `Docs/security-review.md` §8; not fixed autonomously (owner-owned decision; needs field-semantics choices + regression tests). |
-| S2 | Status-transition guard is bypassable by explicit `null`. The `if payload.status is not None` guard skips `validate_status_transition`, so `{"status": null}` evades the state machine and nulls the stored status. | `app/main.py:72`; `app/business_rules.py:14–21` | `PATCH {"status":null}` → 200, no 422; a follow-up read returns `status=null`. State machine itself is sound (illegal transitions → 422). | **Valid** — Medium | **Valid** — Medium | Same root cause as S1; distinct because it defeats a documented business rule. | Same fix as S1. Backlog with S1. |
+| S1 | Explicit-`null` partial update corrupts required fields. `TaskUpdate` fields are `Optional`; `model_dump(exclude_unset=True)` keeps an explicit `null` as "set"; `model_copy(update=…)` writes `None` into non-optional `TaskResponse` fields with no revalidation. | `app/storage.py:63–73`; `app/main.py:70–81`; `app/models.py:54–88` | Reproduced end-to-end: `PATCH {"title":null}` → **200** with `title=null`, then `GET /tasks?search=…` → **500**; poisons the process-global store until restart. | **Valid** — High | **Valid** — High | Reproduced live during owner validation (200 then 500). | Bounded fix available (reject `null` on non-nullable fields, or revalidate the merged model). **Fixed** (commit `578c3dd`, applied on the owner's final directive) — a `reject_explicit_null` validator returns 422 for explicit `null`; regression-tested (`tests/test_null_rejection.py`) and CI green (run 29916912557, 71 passed). Field-semantics choice: `assignee`/`due_date` still accept `null` to clear. |
+| S2 | Status-transition guard is bypassable by explicit `null`. The `if payload.status is not None` guard skips `validate_status_transition`, so `{"status": null}` evades the state machine and nulls the stored status. | `app/main.py:72`; `app/business_rules.py:14–21` | `PATCH {"status":null}` → 200, no 422; a follow-up read returns `status=null`. State machine itself is sound (illegal transitions → 422). | **Valid** — Medium | **Valid** — Medium | Same root cause as S1; distinct because it defeats a documented business rule. | **Fixed** with S1 (commit `578c3dd`) — an explicit `null` status now returns 422 before the transition guard runs, so the state machine can no longer be bypassed; regression-tested and CI green (run 29916912557). |
 | S3 | Unbounded string input: `description` and `assignee` have no length cap or validator (unlike `title`'s 200-char cap) on create or update. | `app/models.py:37,40,58,61` | `POST` with a 100,000-char description → 201 and stored verbatim; 50,000-char assignee → 201. | **Valid** — Medium | **Valid** — Medium | Confirmed; the asymmetry with `title`'s cap shows the bound was intended. | Bounded fix (mirror the existing `title` cap). Backlog (matches `Docs/security-review.md` S3). |
 | S4 | Frontend degrades FastAPI 422 validation errors (array-form `detail`) to a generic message; `typeof body.detail === "string"` is false for the array shape, so the specific field error is lost. | `frontend/index.html` (`handleDrop`/submit error branches) | Read the error-handling branches; FastAPI 422 `detail` is a list, so the string check falls through to the generic fallback. | **Valid** — Low | **Valid** — Low | Minor UX robustness gap; `frontend/` is protected, so deferred. | Backlog/optional (not fixed this release). |
 | S5 | No authentication/authorization on any route. | `app/main.py:37–88`; `README.md` limitations | No identity/permission dependency on any route; README documents auth as out of scope. | **Noise** (as a security *finding*) — documented course-scope limitation | **Noise** | Intentional, documented course scope — not a hidden defect. | Keep local-only for the course; production backlog (matches `Docs/security-review.md` S2). |
@@ -117,10 +117,18 @@ honest about what was inspected, not padded with invented issues:
 
 ### `app/`
 
-- Changed during final project: **No**
-- Files: none (`git diff 46b62cd -- app/` is empty; byte-identical to source)
-- Verified reason: n/a — no application code was changed.
-- Tests/verification: full suite `60 passed` on Python 3.9.6.
+- Changed during final project: **Yes** — one minimal, verified security fix
+  (applied later, on the owner's final directive, to resolve S1/S2 below).
+- Files: `app/models.py` — added a `reject_explicit_null` field validator to
+  `TaskCreate` and `TaskUpdate` for `title`, `description`, `status`, `priority`.
+- Verified reason: an explicit JSON `null` for those four fields now returns
+  HTTP 422 instead of corrupting the stored task (S1) or bypassing the
+  status-transition guard (S2). Omitted fields are unaffected (create defaults
+  and partial updates still work); `assignee`/`due_date` still accept `null` to
+  clear. The validator relies on Pydantic v2 skipping validators for omitted
+  defaults, so only an explicitly-supplied `null` is rejected.
+- Tests/verification: added `tests/test_null_rejection.py` (11 tests); full suite
+  `71 passed` on Python 3.9.6, and CI green (run 29916912557, commit `578c3dd`).
 
 ### `frontend/`
 

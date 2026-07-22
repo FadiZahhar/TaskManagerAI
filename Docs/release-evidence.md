@@ -9,10 +9,38 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Source branch: `module-5-governance`
 - Source commit: `46b62cd1ad945640b26c53fcf99cf8275deca7de`
 - Final branch: `final-project`
-- Verified final-project commit: `b98b5f5bc2bb4b7957e679f832367ec97ada3da5`
-  (CI run 29638641102 green — 60 passed)
-- Verification date: 2026-07-18
+- Verified implementation commit (explicit-`null` fix): `578c3ddecc9e355c5ecc9e6f5a55c69719ad3812`
+  (CI run 29916912557 green — 71 passed)
+- Prior verified commit: `b98b5f5bc2bb4b7957e679f832367ec97ada3da5`
+  (CI run 29638641102 green — 60 passed) — superseded by the explicit-`null` fix
+- Verification date: 2026-07-18 (baseline release); 2026-07-22 (explicit-`null` fix)
 - Feedback-response documentation update: 2026-07-20
+- Explicit-`null` fix + regression evidence: 2026-07-22
+
+## Final Release Evidence
+
+Explicit-`null` rejection fix for the required task request fields — resolves the
+S1/S2 blocker previously recorded in this file and in `Docs/final-ai-review.md`.
+
+- Validated implementation commit SHA: `578c3ddecc9e355c5ecc9e6f5a55c69719ad3812`
+- Branch: `final-project`
+- Implementation CI run: <https://github.com/FadiZahhar/TaskManagerAI/actions/runs/29916912557> (run id 29916912557, workflow `CI`, event `push`)
+- Implementation CI result: **Passed (success)** — head SHA `578c3ddecc9e355c5ecc9e6f5a55c69719ad3812` matches the pushed commit; `71 passed, 3 warnings` (GitHub Actions, ubuntu-latest, Python 3.9)
+- Local test command: `.venv/bin/python -m pytest`
+- Local test result: **71 passed, 0 failed, 0 skipped, 3 warnings** (Python 3.9.6)
+- CI test result: **71 passed, 3 warnings** (from the run's "Run tests" step log)
+
+Explicit `null` values for `title`, `description`, `status`, and `priority` are
+rejected with HTTP 422, and regression tests confirm a rejected update request
+does not modify the existing task. `assignee` and `due_date` still accept `null`
+to clear them; omitting a field in a partial update remains valid.
+
+> Note on the documented SHA: writing this evidence creates a later commit, so
+> the branch HEAD advances past the validated implementation commit. Per the
+> preferred process the **validated implementation commit** above (`578c3dd…`, CI
+> run 29916912557) is the one to cite; the documentation commit that adds this
+> section is a separate follow-up whose own CI run is confirmed after it is pushed
+> (recorded in "Final release result" below).
 
 ## Scope control
 
@@ -22,7 +50,9 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Notifications added: **No**
 - Comments added: **No**
 - Unrelated UI changes added: **No**
-- `app/` changes during final project: **None** (unchanged from source commit)
+- `app/` changes during final project: **One file** — `app/models.py`, the
+  explicit-`null` rejection fix (see "Final Release Evidence" above and
+  `Docs/final-ai-review.md`). No product features added.
 - `frontend/` changes during final project: **None** (unchanged from source commit)
 
 ## Baseline before final edits
@@ -64,10 +94,10 @@ observed on the operator's machine; results are summarized, not fabricated.
 ## Final test verification
 
 - Command: `.venv/bin/python -m pytest`
-- Result: **PASS** (no `app/`, `frontend/`, or `tests/` change was made, so the
-  baseline result stands; re-confirmed in the final verification matrix).
-- Tests collected: 60
-- Passed: 60
+- Result: **PASS** — after the explicit-`null` fix (`app/models.py` +
+  `tests/test_null_rejection.py`), the suite grew from 60 to 71 tests.
+- Tests collected: 71
+- Passed: 71
 - Failed: 0
 - Skipped: 0
 
@@ -83,15 +113,17 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Shortcut scan: **Clean** — no `continue-on-error`, `|| true`, `--exit-zero`,
   skipped/commented pytest, or zero-test success; least-privilege
   `permissions: contents: read` and a 10-minute timeout are set.
-- Latest run result: **PASS (success)** — `60 passed, 3 warnings` on GitHub
+- Latest run result: **PASS (success)** — `71 passed, 3 warnings` on GitHub
   Actions (ubuntu-latest, Python 3.9); every step (checkout, setup-python,
   install dependencies, Run tests) succeeded. Confirmed the suite collected and
-  ran 60 tests (not a zero-test success).
-- Latest run link: <https://github.com/FadiZahhar/TaskManagerAI/actions/runs/29638641102> (run id 29638641102)
-- Verified commit: `b98b5f5bc2bb4b7957e679f832367ec97ada3da5`
+  ran 71 tests (not a zero-test success).
+- Latest run link: <https://github.com/FadiZahhar/TaskManagerAI/actions/runs/29916912557> (run id 29916912557)
+- Verified commit: `578c3ddecc9e355c5ecc9e6f5a55c69719ad3812`
 - Run/commit match: **Yes** — GitHub Actions reports head SHA
-  `b98b5f5bc2bb4b7957e679f832367ec97ada3da5` for run 29638641102. Do not submit
-  a later commit until the CI run for that later SHA is checked and recorded.
+  `578c3ddecc9e355c5ecc9e6f5a55c69719ad3812` for run 29916912557 (the
+  explicit-`null` fix). The prior run 29638641102 (`b98b5f5`, 60 passed) is
+  superseded. Do not submit a later commit until the CI run for that later SHA is
+  checked and recorded.
 
 ## Docker evidence
 
@@ -133,11 +165,12 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Credentials/private keys tracked: **No**
 - Production logs tracked: **No**
 - Personal/customer data found: **No**
-- Remaining blocker: **Known explicit-`null` update defects remain unfixed** —
-  `PATCH` requests that send `null` for required fields can corrupt in-memory
-  task data and bypass the status-transition guard. These are the owner-confirmed
-  S1/S2 findings in `Docs/final-ai-review.md`; they were documented as backlog
-  items and were **not** fixed or regression-tested in this release.
+- Explicit-`null` update defects: **Fixed** — the owner-confirmed S1/S2 findings
+  in `Docs/final-ai-review.md` are resolved by the `reject_explicit_null`
+  validator (commit `578c3dd`). `POST`/`PATCH` with `null` for `title`,
+  `description`, `status`, or `priority` now returns HTTP 422 and does not modify
+  the stored task. Regression-tested (`tests/test_null_rejection.py`, 11 tests)
+  and CI green (run 29916912557, 71 passed).
 - Temporary operator prompt file: **Absent** — `CLAUDE_FINAL_PROJECT_AUTOPILOT.md`
   is not present in the working tree and is not part of the release.
 
@@ -154,15 +187,18 @@ observed on the operator's machine; results are summarized, not fabricated.
 - Docker build: **PASS**
 - Docker health: **PASS** (HTTP 200, non-root)
 - Repository hygiene: **PASS (clean)**
-- Remaining known limitations and defects: no authentication, no persistent
-  database (in-memory, reset on restart), no pagination/resource bounds, single
-  process; `pip-audit`/CVE scan not run. Security findings S1–S4 are owned,
-  documented backlog items; S1/S2 explicit-`null` defects remain valid blockers
-  unless fixed and tested later (see `Docs/final-ai-review.md`).
+- Remaining known limitations: no authentication, no persistent database
+  (in-memory, reset on restart), no pagination/resource bounds, single process;
+  `pip-audit`/CVE scan not run. **S1/S2 explicit-`null` defects are now fixed and
+  regression-tested** (commit `578c3dd`, CI run 29916912557); S3/S4 remain owned,
+  documented backlog items (see `Docs/final-ai-review.md`).
 - Owner validation: **complete (2026-07-18)** — frontend visual PASS, public
   repository/branch confirmed, all AI code-review and security grades confirmed,
   ownership statement approved.
-- Verified final-project commit: `b98b5f5bc2bb4b7957e679f832367ec97ada3da5`
-- Technical status: **SUBMISSION PACKAGE UPDATED; KNOWN NULL-VALUE BLOCKER
-  REMAINS** — not a defect-free release; the explicit-`null` blocker remains
-  unless a later fix is implemented and tested.
+- Validated implementation commit: `578c3ddecc9e355c5ecc9e6f5a55c69719ad3812`
+  (explicit-`null` fix; CI run 29916912557 green — 71 passed). Prior baseline
+  commit `b98b5f5bc2bb4b7957e679f832367ec97ada3da5` (60 passed) is superseded.
+- Technical status: **EXPLICIT-`null` BLOCKER RESOLVED** — the S1/S2
+  explicit-`null` defects are fixed, regression-tested, and CI-verified (commit
+  `578c3dd`, run 29916912557, 71 passed). Remaining limitations (no auth,
+  in-memory storage, no pagination) are documented, owned scope decisions.
