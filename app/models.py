@@ -50,6 +50,17 @@ class TaskCreate(BaseModel):
             raise ValueError("title must be 200 characters or fewer")
         return stripped
 
+    @field_validator("title", "description", "status", "priority")
+    @classmethod
+    def reject_explicit_null(cls, value: object) -> object:
+        # These four fields must never be sent as an explicit JSON ``null``. An
+        # omitted field keeps its model default (validators are skipped for
+        # defaults), so create defaults still apply; a field supplied as ``null``
+        # reaches this validator and is rejected with HTTP 422.
+        if value is None:
+            raise ValueError("must not be null")
+        return value
+
 
 class TaskUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -72,6 +83,19 @@ class TaskUpdate(BaseModel):
         if len(stripped) > 200:
             raise ValueError("title must be 200 characters or fewer")
         return stripped
+
+    @field_validator("title", "description", "status", "priority")
+    @classmethod
+    def reject_explicit_null(cls, value: object) -> object:
+        # Partial updates may OMIT a field (it stays unchanged: the default
+        # ``None`` skips validators and is dropped by ``exclude_unset``). But
+        # explicitly sending ``null`` for one of these four fields reaches this
+        # validator and is rejected with HTTP 422 instead of corrupting the
+        # stored task. ``assignee`` and ``due_date`` are intentionally excluded:
+        # a null there legitimately clears the value.
+        if value is None:
+            raise ValueError("must not be null; omit the field to leave it unchanged")
+        return value
 
 
 class TaskResponse(BaseModel):
